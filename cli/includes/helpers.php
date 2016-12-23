@@ -136,7 +136,7 @@ if (! function_exists('tap')) {
 function user()
 {
     if (! isset($_SERVER['SUDO_USER'])) {
-        return $_SERVER['USER'];
+        return $_SERVER['USERNAME'];
     }
 
     return $_SERVER['SUDO_USER'];

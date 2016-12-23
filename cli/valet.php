@@ -20,7 +20,7 @@ Container::setInstance(new Container);
 
 $version = '2.0.3';
 
-$app = new Application('Laravel Valet', $version);
+$app = new Application('Laravel Valet for Windows', $version);
 
 /**
  * Prune missing directories and symbolic links on every command.
@@ -40,11 +40,11 @@ $app->command('install', function () {
     Configuration::install();
     Nginx::install();
     PhpFpm::install();
-    DnsMasq::install();
+    // DnsMasq::install();
     Nginx::restart();
-    Valet::symlinkToUsersBin();
-    Brew::createSudoersEntry();
-    Valet::createSudoersEntry();
+    // Valet::symlinkToUsersBin();
+    // Brew::createSudoersEntry();
+    // Valet::createSudoersEntry();
 
     output(PHP_EOL.'<info>Valet installed successfully!</info>');
 })->descriptions('Install the Valet services');
@@ -57,9 +57,10 @@ $app->command('domain [domain]', function ($domain = null) {
         return info(Configuration::read()['domain']);
     }
 
-    DnsMasq::updateDomain(
-        $oldDomain = Configuration::read()['domain'], $domain = trim($domain, '.')
-    );
+    $oldDomain = Configuration::read()['domain'];
+    $domain = trim($domain, '.');
+
+    // DnsMasq::updateDomain($oldDomain, $domain);
 
     Configuration::updateKey('domain', $domain);
 
@@ -74,6 +75,8 @@ $app->command('domain [domain]', function ($domain = null) {
  * Add the current working directory to the paths configuration.
  */
 $app->command('park [path]', function ($path = null) {
+    warning('Not implemented yet.'); exit;
+
     Configuration::addPath($path ?: getcwd());
 
     info(($path === null ? "This" : "The [{$path}]") . " directory has been added to Valet's paths.");
@@ -83,6 +86,8 @@ $app->command('park [path]', function ($path = null) {
  * Remove the current working directory from the paths configuration.
  */
 $app->command('forget [path]', function ($path = null) {
+    warning('Not implemented yet.'); exit;
+
     Configuration::removePath($path ?: getcwd());
 
     info(($path === null ? "This" : "The [{$path}]") . " directory has been removed from Valet's paths.");
@@ -92,7 +97,9 @@ $app->command('forget [path]', function ($path = null) {
  * Register a symbolic link with Valet.
  */
 $app->command('link [name]', function ($name) {
-    $linkPath = Site::link(getcwd(), $name = $name ?: basename(getcwd()));
+    $target = getcwd() . ($name ? '/'.$name : '');
+
+    $linkPath = Site::link($target, $name = $name ?: basename(getcwd()));
 
     info('A ['.$name.'] symbolic link has been created in ['.$linkPath.'].');
 })->descriptions('Link the current working directory to Valet');
@@ -117,6 +124,8 @@ $app->command('unlink [name]', function ($name) {
  * Secure the given domain with a trusted TLS certificate.
  */
 $app->command('secure [domain]', function ($domain = null) {
+    warning('Not implemented yet.'); exit;
+
     $url = ($domain ?: Site::host(getcwd())).'.'.Configuration::read()['domain'];
 
     Site::secure($url);
@@ -132,6 +141,8 @@ $app->command('secure [domain]', function ($domain = null) {
  * Stop serving the given domain over HTTPS and remove the trusted TLS certificate.
  */
 $app->command('unsecure [domain]', function ($domain = null) {
+    warning('Not implemented yet.'); exit;
+
     $url = ($domain ?: Site::host(getcwd())).'.'.Configuration::read()['domain'];
 
     Site::unsecure($url);
@@ -175,9 +186,9 @@ $app->command('paths', function () {
  * Open the current directory in the browser.
  */
  $app->command('open', function () {
-     $url = "http://".Site::host(getcwd()).'.'.Configuration::read()['domain'].'/';
+    $url = "http://".Site::host(getcwd()).'.'.Configuration::read()['domain'].'/';
 
-     passthru("open ".escapeshellarg($url));
+    passthru("start $url");
  })->descriptions('Open the site for the current directory in your browser');
 
 /**
@@ -232,6 +243,7 @@ $app->command('stop', function () {
  */
 $app->command('uninstall', function () {
     Nginx::uninstall();
+    PhpFpm::uninstall();
 
     info('Valet has been uninstalled.');
 })->descriptions('Uninstall the Valet services');

@@ -227,7 +227,11 @@ class Filesystem
             $this->unlink($link);
         }
 
-        CommandLineFacade::runAsUser('ln -s '.escapeshellarg($target).' '.escapeshellarg($link));
+        $mode = is_dir($target) ? 'J' : 'H';
+
+        exec("mklink /{$mode} \"{$link}\" \"{$target}\"");
+
+        // CommandLineFacade::runAsUser('ln -s '.escapeshellarg($target).' '.escapeshellarg($link));
     }
 
     /**
@@ -238,7 +242,12 @@ class Filesystem
      */
     function unlink($path)
     {
-        if (file_exists($path) || is_link($path)) {
+        if ($this->isLink($path)) {
+            $dir = pathinfo($path, PATHINFO_DIRNAME);
+            $link = pathinfo($path, PATHINFO_BASENAME);
+
+            exec("cd \"{$dir}\" && rmdir {$link}");
+        } else if (file_exists($path)) {
             @unlink($path);
         }
     }
@@ -284,7 +293,11 @@ class Filesystem
      */
     function isLink($path)
     {
-        return is_link($path);
+        if (is_link($path)) {
+            return true;
+        }
+
+        return $this->isDir($path) && filesize($path) === 0;
     }
 
     /**

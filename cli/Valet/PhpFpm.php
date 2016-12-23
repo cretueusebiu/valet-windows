@@ -8,24 +8,18 @@ use Symfony\Component\Process\Process;
 
 class PhpFpm
 {
-    var $brew, $cli, $files;
-
-    var $taps = [
-        'homebrew/dupes', 'homebrew/versions', 'homebrew/homebrew-php'
-    ];
+    var $cli, $files;
 
     /**
      * Create a new PHP FPM class instance.
      *
-     * @param  Brew  $brew
      * @param  CommandLine  $cli
      * @param  Filesystem  $files
      * @return void
      */
-    function __construct(Brew $brew, CommandLine $cli, Filesystem $files)
+    function __construct(CommandLine $cli, Filesystem $files)
     {
         $this->cli = $cli;
-        $this->brew = $brew;
         $this->files = $files;
     }
 
@@ -36,37 +30,13 @@ class PhpFpm
      */
     function install()
     {
-        if (! $this->brew->installed('php71') &&
-            ! $this->brew->installed('php70') &&
-            ! $this->brew->installed('php56') &&
-            ! $this->brew->installed('php55')) {
-            $this->brew->ensureInstalled('php71', [], $this->taps);
-        }
+        // $this->files->ensureDirExists('/usr/local/var/log', user());
 
-        $this->files->ensureDirExists('/usr/local/var/log', user());
+        // $this->updateConfiguration();
 
-        $this->updateConfiguration();
+        $this->createService();
 
         $this->restart();
-    }
-
-    /**
-     * Update the PHP FPM configuration.
-     *
-     * @return void
-     */
-    function updateConfiguration()
-    {
-        $contents = $this->files->get($this->fpmConfigPath());
-
-        $contents = preg_replace('/^user = .+$/m', 'user = '.user(), $contents);
-        $contents = preg_replace('/^group = .+$/m', 'group = staff', $contents);
-        $contents = preg_replace('/^listen = .+$/m', 'listen = '.VALET_HOME_PATH.'/valet.sock', $contents);
-        $contents = preg_replace('/^;?listen\.owner = .+$/m', 'listen.owner = '.user(), $contents);
-        $contents = preg_replace('/^;?listen\.group = .+$/m', 'listen.group = staff', $contents);
-        $contents = preg_replace('/^;?listen\.mode = .+$/m', 'listen.mode = 0777', $contents);
-
-        $this->files->put($this->fpmConfigPath(), $contents);
     }
 
     /**
@@ -78,7 +48,9 @@ class PhpFpm
     {
         $this->stop();
 
-        $this->brew->restartLinkedPhp();
+        $this->cli->runOrDie('cmd "/C net start PHP_FPM"', function ($code, $output) {
+            warning($output);
+        });
     }
 
     /**
@@ -88,23 +60,63 @@ class PhpFpm
      */
     function stop()
     {
-        $this->brew->stopService('php55', 'php56', 'php70', 'php71');
+        $this->cli->run('cmd "/C net stop PHP_FPM"');
     }
 
     /**
-     * Get the path to the FPM configuration file for the current PHP version.
+     * Prepare PHP FPM for uninstallation.
+     *
+     * @return void
+     */
+    function uninstall()
+    {
+        $this->deleteService();
+    }
+
+    /**
+     * Delete the Windows service.
+     *
+     * @return void
+     */
+    function deleteService()
+    {
+        $this->stop();
+
+        $this->cli->run('cmd "/C sc delete PHP_FPM"');
+    }
+
+    /**
+     * Create the Windows service.
+     *
+     * @return void
+     */
+    function createService()
+    {
+        $this->deleteService();
+
+        $this->cli->runOrDie($this->serviceCommand(), function ($code, $output) {
+            warning($output);
+        });
+    }
+
+    /**
+     * Get the command for creating the Windows service.
      *
      * @return string
      */
-    function fpmConfigPath()
+    function serviceCommand()
     {
-        $confLookup = [
-            'php71' => '/usr/local/etc/php/7.1/php-fpm.d/www.conf',
-            'php70' => '/usr/local/etc/php/7.0/php-fpm.d/www.conf',
-            'php56' => '/usr/local/etc/php/5.6/php-fpm.conf',
-            'php55' => '/usr/local/etc/php/5.5/php-fpm.conf',
-        ];
+        $service = realpath(__DIR__.'/../../bin/service.exe');
 
-        return $confLookup[$this->brew->linkedPhp()];
+        $php = $this->cli->runOrDie('where php', function ($code, $output) {
+            warning('Could not find PHP. Make sure it\'s added to the environment variables.');
+        });
+
+        $php = pathinfo($php, PATHINFO_DIRNAME);
+        $fpm = $php.'/php-cgi.exe';
+        $ini = $php.'/php.ini';
+
+        return 'cmd "/C sc create PHP_FPM binPath= "'.$service.' \"'.$fpm.' -b 127.0.0.1:9000 -c '.
+                $ini.'"" type= own start= auto error= ignore DisplayName= PHP_FPM"';
     }
 }
