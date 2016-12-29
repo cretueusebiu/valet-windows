@@ -57,7 +57,7 @@ class WinSW
     {
         $this->stop($service);
 
-        $this->cli->quietly('cmd "/C cd '.VALET_HOME_PATH.'\Services && '.$service.' uninstall"');
+        $this->cli->run('cmd "/C cd '.VALET_HOME_PATH.'\Services && '.$service.' uninstall"');
 
         // $this->files->unlink(VALET_HOME_PATH."/Services/$service.exe");
         // $this->files->unlink(VALET_HOME_PATH."/Services/$service.xml");
@@ -88,6 +88,6 @@ class WinSW
      */
     public function stop($service)
     {
-        $this->cli->quietly('cmd "/C cd '.VALET_HOME_PATH.'\Services && '.$service.' stop"');
+        $this->cli->run('cmd "/C cd '.VALET_HOME_PATH.'\Services && '.$service.' stop"');
     }
 }
