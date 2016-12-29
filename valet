@@ -20,15 +20,6 @@ then
     DIR=$(php -r "echo realpath('$DIR/../laravel/valet');")
 fi
 
-# If the command is one of the commands that requires "sudo" privileges
-# then we'll proxy the incoming CLI request using sudo, which allows
-# us to never require the end users to manually specify each sudo.
-# if [[ "$EUID" -ne 0 ]]
-# then
-#     sudo $SOURCE "$@"
-#     exit
-# fi
-
 # If the command is the "share" command we will need to resolve out any
 # symbolic links for the site. Before starting Ngrok, we will fire a
 # process to retrieve the live Ngrok tunnel URL in the background.
@@ -46,7 +37,7 @@ then
 
     # Fetch Ngrok URL In Background...
     bash "$DIR/cli/scripts/fetch-share-url.sh" &
-    sudo -u $(logname) "$DIR/bin/ngrok" http "$HOST.$DOMAIN:80" -host-header=rewrite ${*:2}
+    "$DIR/bin/ngrok" http "$HOST.$DOMAIN:80" -host-header=rewrite ${*:2}
     exit
 
 # Finally, for every other command we will just proxy into the PHP tool
