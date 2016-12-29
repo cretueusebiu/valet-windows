@@ -8,19 +8,23 @@ use Symfony\Component\Process\Process;
 
 class PhpFpm
 {
-    var $cli, $files;
+    var $cli, $files, $winsw;
+
+    const SERVICE = 'phpfpmservice';
 
     /**
      * Create a new PHP FPM class instance.
      *
      * @param  CommandLine  $cli
      * @param  Filesystem  $files
+     * @param  WinSW $winsw
      * @return void
      */
-    function __construct(CommandLine $cli, Filesystem $files)
+    function __construct(CommandLine $cli, Filesystem $files, WinSW $winsw)
     {
         $this->cli = $cli;
         $this->files = $files;
+        $this->winsw = $winsw;
     }
 
     /**
@@ -30,11 +34,9 @@ class PhpFpm
      */
     function install()
     {
-        // $this->files->ensureDirExists('/usr/local/var/log', user());
+        $this->uninstall();
 
-        // $this->updateConfiguration();
-
-        $this->createService();
+        $this->winsw->install(static::SERVICE, ['PHP_PATH' => $this->findPhpPath()]);
 
         $this->restart();
     }
@@ -46,11 +48,7 @@ class PhpFpm
      */
     function restart()
     {
-        $this->stop();
-
-        $this->cli->runOrDie('cmd "/C net start PHP_FPM"', function ($code, $output) {
-            warning($output);
-        });
+        $this->winsw->restart(static::SERVICE);
     }
 
     /**
@@ -60,7 +58,7 @@ class PhpFpm
      */
     function stop()
     {
-        $this->cli->run('cmd "/C net stop PHP_FPM"');
+        $this->winsw->stop(static::SERVICE);
     }
 
     /**
@@ -70,53 +68,20 @@ class PhpFpm
      */
     function uninstall()
     {
-        $this->deleteService();
+        $this->winsw->uninstall(static::SERVICE);
     }
 
     /**
-     * Delete the Windows service.
-     *
-     * @return void
-     */
-    function deleteService()
-    {
-        $this->stop();
-
-        $this->cli->run('cmd "/C sc delete PHP_FPM"');
-    }
-
-    /**
-     * Create the Windows service.
-     *
-     * @return void
-     */
-    function createService()
-    {
-        $this->deleteService();
-
-        $this->cli->runOrDie($this->serviceCommand(), function ($code, $output) {
-            warning($output);
-        });
-    }
-
-    /**
-     * Get the command for creating the Windows service.
+     * Find the PHP path.
      *
      * @return string
      */
-    function serviceCommand()
+    function findPhpPath()
     {
-        $service = realpath(__DIR__.'/../../bin/service.exe');
-
         $php = $this->cli->runOrDie('where php', function ($code, $output) {
             warning('Could not find PHP. Make sure it\'s added to the environment variables.');
         });
 
-        $php = pathinfo($php, PATHINFO_DIRNAME);
-        $fpm = $php.'/php-cgi.exe';
-        $ini = $php.'/php.ini';
-
-        return 'cmd "/C sc create PHP_FPM binPath= "'.$service.' \"'.$fpm.' -b 127.0.0.1:9000 -c '.
-                $ini.'"" type= own start= auto error= ignore DisplayName= PHP_FPM"';
+        return pathinfo($php, PATHINFO_DIRNAME);
     }
 }

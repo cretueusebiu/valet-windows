@@ -11,7 +11,9 @@ class Nginx
     var $files;
     var $configuration;
     var $site;
+    var $winsw;
 
+    const SERVICE = 'nginxservice';
     const DOWNLOAD_URL = 'http://nginx.org/download/nginx-1.11.7.zip';
 
     /**
@@ -21,14 +23,16 @@ class Nginx
      * @param  Filesystem  $files
      * @param  Configuration  $configuration
      * @param  Site  $site
+     * @param  WinSW  $winsw
      * @return void
      */
     function __construct(CommandLine $cli, Filesystem $files,
-                         Configuration $configuration, Site $site)
+                         Configuration $configuration, Site $site, WinSW $winsw)
     {
         $this->cli = $cli;
         $this->site = $site;
         $this->files = $files;
+        $this->winsw = $winsw;
         $this->configuration = $configuration;
     }
 
@@ -39,11 +43,10 @@ class Nginx
      */
     function install()
     {
-        $this->ensureInstalled();
-
         $this->installConfiguration();
         $this->installServer();
         $this->installNginxDirectory();
+        $this->installService();
     }
 
     /**
@@ -73,8 +76,8 @@ class Nginx
         $this->files->putAsUser(
             $this->path().'/valet/valet.conf',
             str_replace(
-                ['VALET_HOME_PATH', 'VALET_SERVER_PATH', 'VALET_STATIC_PREFIX'],
-                [VALET_HOME_PATH, VALET_SERVER_PATH, VALET_STATIC_PREFIX],
+                ['VALET_HOME_PATH', 'VALET_SERVER_PATH', 'VALET_STATIC_PREFIX', 'HOME_PATH'],
+                [VALET_HOME_PATH, VALET_SERVER_PATH, VALET_STATIC_PREFIX, $_SERVER['HOME']],
                 $this->files->get(__DIR__.'/../stubs/valet.conf')
             )
         );
@@ -116,15 +119,27 @@ class Nginx
     }
 
     /**
+     * Install the Windows service.
+     *
+     * @return void
+     */
+    function installService()
+    {
+        $this->uninstall();
+
+        $this->winsw->install(static::SERVICE, [
+            'NGINX_PATH' => realpath(__DIR__."/../../bin/nginx"),
+        ]);
+    }
+
+    /**
      * Restart the Nginx service.
      *
      * @return void
      */
     function restart()
     {
-        $this->stop();
-
-        $this->cli->quietly('cmd "/C cd '.$this->path().' && start nginx"');
+        $this->winsw->restart(static::SERVICE);
     }
 
     /**
@@ -134,7 +149,7 @@ class Nginx
      */
     function stop()
     {
-        $this->cli->quietly('cmd "/C cd '.$this->path().' && nginx -s stop"');
+        $this->winsw->stop(static::SERVICE);
     }
 
     /**
@@ -144,7 +159,7 @@ class Nginx
      */
     function uninstall()
     {
-        $this->stop();
+        $this->winsw->uninstall(static::SERVICE);
     }
 
     /**
@@ -155,82 +170,5 @@ class Nginx
     function path()
     {
         return realpath(__DIR__.'/../../bin/nginx');
-    }
-
-    /**
-     * Delete the Windows service.
-     *
-     * @return void
-     */
-    function deleteService()
-    {
-        $this->stop();
-
-        $this->cli->run('cmd "/C sc delete VALET_NGINX"');
-    }
-
-    /**
-     * Create the Windows service.
-     *
-     * @return void
-     */
-    function createService()
-    {
-        $this->deleteService();
-
-        $this->cli->runOrDie($this->serviceCommand(), function ($code, $output) {
-            warning($output);
-        });
-    }
-
-    /**
-     * Get the command for creating the Windows service.
-     *
-     * @return string
-     */
-    function serviceCommand()
-    {
-        $service = realpath(__DIR__.'/../../bin/service.exe');
-
-        $this->cli->quietly('cmd "/C cd '.$this->path().' && start nginx"');
-
-        return 'cmd "/C sc create VALET_NGINX binPath= "'.$service.' \"'.$fpm.' -b 127.0.0.1:9000 -c '.
-                $ini.'"" type= own start= auto error= ignore DisplayName= VALET_NGINX"';
-    }
-
-    /**
-     * Ensure that Nginx is installed.
-     *
-     * @return void
-     */
-    function ensureInstalled()
-    {
-        if (is_dir($this->path())) {
-            return;
-        }
-
-        output('<info>[Nginx] is not installed, installing it now...</info>');
-
-        $binPath = realpath(__DIR__.'/../../bin');
-
-        $zipPath = $binPath.'/nginx.zip';
-
-        $contents = $this->files->get(static::DOWNLOAD_URL);
-
-        if ($contents === false || file_put_contents($zipPath, $contents) === false) {
-            throw new DomainException('Unable to download [Nginx].');
-        }
-
-        $zip = new ZipArchive;
-        if ($zip->open($zipPath)) {
-            $zip->extractTo($binPath);
-            $zip->close();
-        } else {
-            throw new DomainException('Unable to unzip [Nginx].');
-        }
-
-        rename($binPath.'/'.pathinfo(static::DOWNLOAD_URL, PATHINFO_FILENAME), $binPath.'/nginx');
-
-        $this->files->unlink($zipPath);
     }
 }

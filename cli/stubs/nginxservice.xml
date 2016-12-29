@@ -1,0 +1,15 @@
+<service>
+  <id>valet_nginx</id>
+  <name>valet_nginx</name>
+  <description>Valet Nginx</description>
+  <executable>NGINX_PATH\nginx.exe</executable>
+  <startargument>-p</startargument>
+  <startargument>NGINX_PATH</startargument>
+  <stopexecutable>NGINX_PATH\nginx.exe</stopexecutable>
+  <stopargument>-p</stopargument>
+  <stopargument>NGINX_PATH</stopargument>
+  <stopargument>-s</stopargument>
+  <stopargument>stop</stopargument>
+  <logpath>VALET_HOME_PATH\Log\</logpath>
+  <logmode>reset</logmode>
+</service>
