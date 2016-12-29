@@ -96,7 +96,7 @@ class Configuration
     }
 
     /**
-     * Create the directory for WinSW XML config files.
+     * Create the directory for the Windows services.
      *
      * @return void
      */

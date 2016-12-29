@@ -28,7 +28,7 @@ class PhpFpm
     }
 
     /**
-     * Install and configure DnsMasq.
+     * Install and configure PHP FPM.
      *
      * @return void
      */

@@ -14,7 +14,6 @@ class Nginx
     var $winsw;
 
     const SERVICE = 'nginxservice';
-    const DOWNLOAD_URL = 'http://nginx.org/download/nginx-1.11.7.zip';
 
     /**
      * Create a new Nginx instance.
