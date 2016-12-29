@@ -2,3 +2,6 @@
 vendor/
 composer.lock
 error.log
+bin/nginx/valet
+bin/nginx/conf/nginx.conf
+bin/nginx/conf/fastcgi_params
