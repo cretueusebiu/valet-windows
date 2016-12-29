@@ -36,15 +36,16 @@ if (is_dir(VALET_HOME_PATH)) {
  */
 $app->command('install', function () {
     Nginx::stop();
+    PhpFpm::stop();
+    Acrylic::stop();
 
     Configuration::install();
+
     Nginx::install();
     PhpFpm::install();
-    // DnsMasq::install();
+    Acrylic::install();
+
     Nginx::restart();
-    // Valet::symlinkToUsersBin();
-    // Brew::createSudoersEntry();
-    // Valet::createSudoersEntry();
 
     output(PHP_EOL.'<info>Valet installed successfully!</info>');
 })->descriptions('Install the Valet services');
@@ -60,7 +61,7 @@ $app->command('domain [domain]', function ($domain = null) {
     $oldDomain = Configuration::read()['domain'];
     $domain = trim($domain, '.');
 
-    // DnsMasq::updateDomain($oldDomain, $domain);
+    Acrylic::updateDomain($oldDomain, $domain);
 
     Configuration::updateKey('domain', $domain);
 
@@ -75,8 +76,6 @@ $app->command('domain [domain]', function ($domain = null) {
  * Add the current working directory to the paths configuration.
  */
 $app->command('park [path]', function ($path = null) {
-    warning('Not implemented yet.'); exit;
-
     Configuration::addPath($path ?: getcwd());
 
     info(($path === null ? "This" : "The [{$path}]") . " directory has been added to Valet's paths.");
@@ -86,8 +85,6 @@ $app->command('park [path]', function ($path = null) {
  * Remove the current working directory from the paths configuration.
  */
 $app->command('forget [path]', function ($path = null) {
-    warning('Not implemented yet.'); exit;
-
     Configuration::removePath($path ?: getcwd());
 
     info(($path === null ? "This" : "The [{$path}]") . " directory has been removed from Valet's paths.");
@@ -213,6 +210,8 @@ $app->command('start', function () {
 
     Nginx::restart();
 
+    Acrylic::restart();
+
     info('Valet services have been started.');
 })->descriptions('Start the Valet services');
 
@@ -223,6 +222,8 @@ $app->command('restart', function () {
     PhpFpm::restart();
 
     Nginx::restart();
+
+    Acrylic::restart();
 
     info('Valet services have been restarted.');
 })->descriptions('Restart the Valet services');
@@ -235,6 +236,8 @@ $app->command('stop', function () {
 
     Nginx::stop();
 
+    Acrylic::stop();
+
     info('Valet services have been stopped.');
 })->descriptions('Stop the Valet services');
 
@@ -243,7 +246,10 @@ $app->command('stop', function () {
  */
 $app->command('uninstall', function () {
     Nginx::uninstall();
+
     PhpFpm::uninstall();
+
+    Acrylic::uninstall();
 
     info('Valet has been uninstalled.');
 })->descriptions('Uninstall the Valet services');
