@@ -2,26 +2,26 @@
 
 namespace Valet;
 
-use Exception;
-use Symfony\Component\Process\Process;
-
 class DnsMasq
 {
-    var $brew, $cli, $files;
+    public $brew;
+    public $cli;
+    public $files;
 
-    var $resolverPath = '/etc/resolver';
-    var $configPath = '/usr/local/etc/dnsmasq.conf';
-    var $exampleConfigPath = '/usr/local/opt/dnsmasq/dnsmasq.conf.example';
+    public $resolverPath = '/etc/resolver';
+    public $configPath = '/usr/local/etc/dnsmasq.conf';
+    public $exampleConfigPath = '/usr/local/opt/dnsmasq/dnsmasq.conf.example';
 
     /**
      * Create a new DnsMasq instance.
      *
-     * @param  Brew  $brew
-     * @param  CommandLine  $cli
-     * @param  Filesystem  $files
+     * @param Brew        $brew
+     * @param CommandLine $cli
+     * @param Filesystem  $files
+     *
      * @return void
      */
-    function __construct(Brew $brew, CommandLine $cli, Filesystem $files)
+    public function __construct(Brew $brew, CommandLine $cli, Filesystem $files)
     {
         $this->cli = $cli;
         $this->brew = $brew;
@@ -33,7 +33,7 @@ class DnsMasq
      *
      * @return void
      */
-    function install($domain = 'dev')
+    public function install($domain = 'dev')
     {
         $this->brew->ensureInstalled('dnsmasq');
 
@@ -50,10 +50,11 @@ class DnsMasq
     /**
      * Append the custom DnsMasq configuration file to the main configuration file.
      *
-     * @param  string  $domain
+     * @param string $domain
+     *
      * @return void
      */
-    function createCustomConfigFile($domain)
+    public function createCustomConfigFile($domain)
     {
         $customConfigPath = $this->customConfigPath();
 
@@ -69,9 +70,9 @@ class DnsMasq
      *
      * @return void
      */
-    function copyExampleConfig()
+    public function copyExampleConfig()
     {
-        if (! $this->files->exists($this->configPath)) {
+        if (!$this->files->exists($this->configPath)) {
             $this->files->copyAsUser(
                 $this->exampleConfigPath,
                 $this->configPath
@@ -82,12 +83,13 @@ class DnsMasq
     /**
      * Append import command for our custom configuration to DnsMasq file.
      *
-     * @param  string  $customConfigPath
+     * @param string $customConfigPath
+     *
      * @return void
      */
-    function appendCustomConfigImport($customConfigPath)
+    public function appendCustomConfigImport($customConfigPath)
     {
-        if (! $this->customConfigIsBeingImported($customConfigPath)) {
+        if (!$this->customConfigIsBeingImported($customConfigPath)) {
             $this->files->appendAsUser(
                 $this->configPath,
                 PHP_EOL.'conf-file='.$customConfigPath.PHP_EOL
@@ -98,10 +100,11 @@ class DnsMasq
     /**
      * Determine if Valet's custom DnsMasq configuration is being imported.
      *
-     * @param  string  $customConfigPath
+     * @param string $customConfigPath
+     *
      * @return bool
      */
-    function customConfigIsBeingImported($customConfigPath)
+    public function customConfigIsBeingImported($customConfigPath)
     {
         return strpos($this->files->get($this->configPath), $customConfigPath) !== false;
     }
@@ -109,10 +112,11 @@ class DnsMasq
     /**
      * Create the resolver file to point the "dev" domain to 127.0.0.1.
      *
-     * @param  string  $domain
+     * @param string $domain
+     *
      * @return void
      */
-    function createDomainResolver($domain)
+    public function createDomainResolver($domain)
     {
         $this->files->ensureDirExists($this->resolverPath);
 
@@ -122,11 +126,12 @@ class DnsMasq
     /**
      * Update the domain used by DnsMasq.
      *
-     * @param  string  $oldDomain
-     * @param  string  $newDomain
+     * @param string $oldDomain
+     * @param string $newDomain
+     *
      * @return void
      */
-    function updateDomain($oldDomain, $newDomain)
+    public function updateDomain($oldDomain, $newDomain)
     {
         $this->files->unlink($this->resolverPath.'/'.$oldDomain);
 
@@ -138,7 +143,7 @@ class DnsMasq
      *
      * @return string
      */
-    function customConfigPath()
+    public function customConfigPath()
     {
         return $_SERVER['HOME'].'/.valet/dnsmasq.conf';
     }

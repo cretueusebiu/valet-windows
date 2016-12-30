@@ -1,9 +1,9 @@
 <?php
 
-use Valet\Site;
-use Valet\Filesystem;
-use Valet\Configuration;
 use Illuminate\Container\Container;
+use Valet\Configuration;
+use Valet\Filesystem;
+use Valet\Site;
 
 class SiteTest extends PHPUnit_Framework_TestCase
 {
@@ -11,9 +11,8 @@ class SiteTest extends PHPUnit_Framework_TestCase
     {
         $_SERVER['SUDO_USER'] = user();
 
-        Container::setInstance(new Container);
+        Container::setInstance(new Container());
     }
-
 
     public function tearDown()
     {
@@ -23,7 +22,6 @@ class SiteTest extends PHPUnit_Framework_TestCase
 
         Mockery::close();
     }
-
 
     public function test_symlink_creates_symlink_to_given_path()
     {
@@ -40,7 +38,6 @@ class SiteTest extends PHPUnit_Framework_TestCase
         $this->assertSame(VALET_HOME_PATH.'/Sites/link', $linkPath);
     }
 
-
     public function test_unlink_removes_existing_symlink()
     {
         file_put_contents(__DIR__.'/output/file.out', 'test');
@@ -54,7 +51,6 @@ class SiteTest extends PHPUnit_Framework_TestCase
         $this->assertFileNotExists(__DIR__.'/output/link');
     }
 
-
     public function test_prune_links_removes_broken_symlinks_in_sites_path()
     {
         file_put_contents(__DIR__.'/output/file.out', 'test');
@@ -66,10 +62,9 @@ class SiteTest extends PHPUnit_Framework_TestCase
     }
 }
 
-
 class StubForRemovingLinks extends Site
 {
-    function sitesPath()
+    public function sitesPath()
     {
         return __DIR__.'/output';
     }

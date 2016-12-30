@@ -2,25 +2,26 @@
 
 namespace Valet;
 
-use Exception;
-use DomainException;
 use Symfony\Component\Process\Process;
 
 class PhpFpm
 {
-    var $cli, $files, $winsw;
+    public $cli;
+    public $files;
+    public $winsw;
 
     const SERVICE = 'phpfpmservice';
 
     /**
      * Create a new PHP FPM class instance.
      *
-     * @param  CommandLine  $cli
-     * @param  Filesystem  $files
-     * @param  WinSW $winsw
+     * @param CommandLine $cli
+     * @param Filesystem  $files
+     * @param WinSW       $winsw
+     *
      * @return void
      */
-    function __construct(CommandLine $cli, Filesystem $files, WinSW $winsw)
+    public function __construct(CommandLine $cli, Filesystem $files, WinSW $winsw)
     {
         $this->cli = $cli;
         $this->files = $files;
@@ -32,7 +33,7 @@ class PhpFpm
      *
      * @return void
      */
-    function install()
+    public function install()
     {
         $this->uninstall();
 
@@ -46,7 +47,7 @@ class PhpFpm
      *
      * @return void
      */
-    function restart()
+    public function restart()
     {
         $this->winsw->restart(static::SERVICE);
     }
@@ -56,7 +57,7 @@ class PhpFpm
      *
      * @return void
      */
-    function stop()
+    public function stop()
     {
         $this->winsw->stop(static::SERVICE);
     }
@@ -66,7 +67,7 @@ class PhpFpm
      *
      * @return void
      */
-    function uninstall()
+    public function uninstall()
     {
         $this->winsw->uninstall(static::SERVICE);
     }
@@ -76,7 +77,7 @@ class PhpFpm
      *
      * @return string
      */
-    function findPhpPath()
+    public function findPhpPath()
     {
         $php = $this->cli->runOrDie('where php', function ($code, $output) {
             warning('Could not find PHP. Make sure it\'s added to the environment variables.');

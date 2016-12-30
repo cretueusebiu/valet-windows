@@ -5,9 +5,10 @@ class CraftValetDriver extends ValetDriver
     /**
      * Determine if the driver serves the request.
      *
-     * @param  string  $sitePath
-     * @param  string  $siteName
-     * @param  string  $uri
+     * @param string $sitePath
+     * @param string $siteName
+     * @param string $uri
+     *
      * @return bool
      */
     public function serves($sitePath, $siteName, $uri)
@@ -18,9 +19,10 @@ class CraftValetDriver extends ValetDriver
     /**
      * Determine if the incoming request is for a static file.
      *
-     * @param  string  $sitePath
-     * @param  string  $siteName
-     * @param  string  $uri
+     * @param string $sitePath
+     * @param string $siteName
+     * @param string $uri
+     *
      * @return string|false
      */
     public function isStaticFile($sitePath, $siteName, $uri)
@@ -35,9 +37,10 @@ class CraftValetDriver extends ValetDriver
     /**
      * Get the fully resolved path to the application's front controller.
      *
-     * @param  string  $sitePath
-     * @param  string  $siteName
-     * @param  string  $uri
+     * @param string $sitePath
+     * @param string $siteName
+     * @param string $uri
+     *
      * @return string
      */
     public function frontControllerPath($sitePath, $siteName, $uri)
@@ -168,8 +171,8 @@ class CraftValetDriver extends ValetDriver
         $parts = explode('/', $uri);
 
         if (count($parts) > 1 && in_array($parts[1], $locales)) {
-            $indexPath = $sitePath.'/public/'. $parts[1] .'/index.php';
-            $scriptName = '/' . $parts[1] . '/index.php';
+            $indexPath = $sitePath.'/public/'.$parts[1].'/index.php';
+            $scriptName = '/'.$parts[1].'/index.php';
         }
 
         $_SERVER['SCRIPT_FILENAME'] = $indexPath;

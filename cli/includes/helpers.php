@@ -1,23 +1,23 @@
 <?php
 
 use Illuminate\Container\Container;
-use Symfony\Component\Process\Process;
 
 if (!isset($_SERVER['HOME'])) {
     $_SERVER['HOME'] = $_SERVER['USERPROFILE'];
 }
 
-/**
+/*
  * Define the ~/.valet path as a constant.
  */
 define('VALET_HOME_PATH', $_SERVER['HOME'].'/.valet');
-define('VALET_SERVER_PATH', realpath(__DIR__ . '/../../server.php'));
+define('VALET_SERVER_PATH', realpath(__DIR__.'/../../server.php'));
 define('VALET_STATIC_PREFIX', '41c270e4-5535-4daa-b23e-c269744c2f45');
 
 /**
  * Output the given text to the console.
  *
- * @param  string  $output
+ * @param string $output
+ *
  * @return void
  */
 function info($output)
@@ -28,7 +28,8 @@ function info($output)
 /**
  * Output the given text to the console.
  *
- * @param  string  $output
+ * @param string $output
+ *
  * @return void
  */
 function warning($output)
@@ -39,7 +40,8 @@ function warning($output)
 /**
  * Output the given text to the console.
  *
- * @param  string  $output
+ * @param string $output
+ *
  * @return void
  */
 function output($output)
@@ -48,14 +50,15 @@ function output($output)
         return;
     }
 
-    (new Symfony\Component\Console\Output\ConsoleOutput)->writeln($output);
+    (new Symfony\Component\Console\Output\ConsoleOutput())->writeln($output);
 }
 
-if (! function_exists('resolve')) {
+if (!function_exists('resolve')) {
     /**
      * Resolve the given class from the container.
      *
-     * @param  string  $class
+     * @param string $class
+     *
      * @return mixed
      */
     function resolve($class)
@@ -67,8 +70,9 @@ if (! function_exists('resolve')) {
 /**
  * Swap the given class implementation in the container.
  *
- * @param  string  $class
- * @param  mixed  $instance
+ * @param string $class
+ * @param mixed  $instance
+ *
  * @return void
  */
 function swap($class, $instance)
@@ -76,13 +80,14 @@ function swap($class, $instance)
     Container::getInstance()->instance($class, $instance);
 }
 
-if (! function_exists('retry')) {
+if (!function_exists('retry')) {
     /**
      * Retry the given function N times.
      *
-     * @param  int  $retries
-     * @param  callable  $retries
-     * @param  int  $sleep
+     * @param int      $retries
+     * @param callable $retries
+     * @param int      $sleep
+     *
      * @return mixed
      */
     function retry($retries, $fn, $sleep = 0)
@@ -91,7 +96,7 @@ if (! function_exists('retry')) {
         try {
             return $fn();
         } catch (Exception $e) {
-            if (! $retries) {
+            if (!$retries) {
                 throw $e;
             }
 
@@ -113,17 +118,18 @@ if (! function_exists('retry')) {
  */
 function should_be_sudo()
 {
-    if (! isset($_SERVER['SUDO_USER'])) {
+    if (!isset($_SERVER['SUDO_USER'])) {
         throw new Exception('This command must be run with sudo.');
     }
 }
 
-if (! function_exists('tap')) {
+if (!function_exists('tap')) {
     /**
      * Tap the given value.
      *
-     * @param  mixed  $value
-     * @param  callable  $callback
+     * @param mixed    $value
+     * @param callable $callback
+     *
      * @return mixed
      */
     function tap($value, callable $callback)
@@ -135,11 +141,11 @@ if (! function_exists('tap')) {
 }
 
 /**
- * Get the user
+ * Get the user.
  */
 function user()
 {
-    if (! isset($_SERVER['SUDO_USER'])) {
+    if (!isset($_SERVER['SUDO_USER'])) {
         return $_SERVER['USERNAME'];
     }
 

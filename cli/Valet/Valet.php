@@ -4,17 +4,18 @@ namespace Valet;
 
 class Valet
 {
-    var $cli, $files;
+    public $cli;
+    public $files;
 
-    var $valetBin = '/usr/local/bin/valet';
+    public $valetBin = '/usr/local/bin/valet';
 
     /**
      * Create a new Valet instance.
      *
-     * @param  CommandLine  $cli
-     * @param  Filesystem  $files
+     * @param CommandLine $cli
+     * @param Filesystem  $files
      */
-    function __construct(CommandLine $cli, Filesystem $files)
+    public function __construct(CommandLine $cli, Filesystem $files)
     {
         $this->cli = $cli;
         $this->files = $files;
@@ -25,7 +26,7 @@ class Valet
      *
      * @return void
      */
-    function symlinkToUsersBin()
+    public function symlinkToUsersBin()
     {
         $this->cli->quietlyAsUser('rm '.$this->valetBin);
 
@@ -37,7 +38,7 @@ class Valet
      *
      * @return void
      */
-    function createSudoersEntry()
+    public function createSudoersEntry()
     {
         $this->files->ensureDirExists('/etc/sudoers.d');
 
@@ -50,9 +51,9 @@ class Valet
      *
      * @return array
      */
-    function extensions()
+    public function extensions()
     {
-        if (! $this->files->isDir(VALET_HOME_PATH.'/Extensions')) {
+        if (!$this->files->isDir(VALET_HOME_PATH.'/Extensions')) {
             return [];
         }
 
@@ -69,10 +70,11 @@ class Valet
     /**
      * Determine if this is the latest version of Valet.
      *
-     * @param  string  $currentVersion
+     * @param string $currentVersion
+     *
      * @return bool
      */
-    function onLatestVersion($currentVersion)
+    public function onLatestVersion($currentVersion)
     {
         $response = \Httpful\Request::get('https://api.github.com/repos/cretueusebiu/valet-windows/releases/latest')->send();
 

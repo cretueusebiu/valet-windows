@@ -2,27 +2,26 @@
 
 namespace Valet;
 
-use Exception;
-use DomainException;
-
 class Acrylic
 {
-    var $cli, $files;
+    public $cli;
+    public $files;
 
     /**
      * Create a new Acrylic instance.
      *
-     * @param  CommandLine  $cli
-     * @param  Filesystem  $files
+     * @param CommandLine $cli
+     * @param Filesystem  $files
+     *
      * @return void
      */
-    function __construct(CommandLine $cli, Filesystem $files)
+    public function __construct(CommandLine $cli, Filesystem $files)
     {
         $this->cli = $cli;
         $this->files = $files;
     }
 
-    function install($domain = 'dev')
+    public function install($domain = 'dev')
     {
         $this->cli->runOrDie('cmd "/C '.$this->path().'/AcrylicController InstallAcrylicService"', function ($code, $output) {
             warning($output);
@@ -33,7 +32,7 @@ class Acrylic
         $this->restart();
     }
 
-    function createConfigFile($domain)
+    public function createConfigFile($domain)
     {
         $contents = $this->files->get(__DIR__.'/../stubs/AcrylicHosts.txt');
 
@@ -44,7 +43,7 @@ class Acrylic
 
         $customConfigPath = VALET_HOME_PATH.'/AcrylicHosts.txt';
 
-        if (! $this->files->exists($customConfigPath)) {
+        if (!$this->files->exists($customConfigPath)) {
             $this->files->putAsUser($customConfigPath, PHP_EOL);
         }
     }
@@ -52,11 +51,12 @@ class Acrylic
     /**
      * Update the domain used by Acrylic DNS.
      *
-     * @param  string  $oldDomain
-     * @param  string  $newDomain
+     * @param string $oldDomain
+     * @param string $newDomain
+     *
      * @return void
      */
-    function updateDomain($oldDomain, $newDomain)
+    public function updateDomain($oldDomain, $newDomain)
     {
         $this->stop();
 
@@ -65,14 +65,14 @@ class Acrylic
         $this->restart();
     }
 
-    function uninstall()
+    public function uninstall()
     {
         $this->stop();
 
         $this->cli->quietly('cmd "/C '.$this->path().'/AcrylicController UninstallAcrylicService"');
     }
 
-    function start()
+    public function start()
     {
         $this->cli->runOrDie('cmd "/C '.$this->path().'/AcrylicController StartAcrylicServiceSilently"', function ($code, $output) {
             warning($output);
@@ -81,21 +81,21 @@ class Acrylic
         $this->flushdns();
     }
 
-    function stop()
+    public function stop()
     {
         $this->cli->run('cmd "/C '.$this->path().'/AcrylicController StopAcrylicServiceSilently"');
 
         $this->flushdns();
     }
 
-    function restart()
+    public function restart()
     {
         $this->stop();
 
         $this->start();
     }
 
-    function flushdns()
+    public function flushdns()
     {
         $this->cli->run('cmd "/C ipconfig /flushdns"');
     }
@@ -105,7 +105,7 @@ class Acrylic
      *
      * @return string
      */
-    function path()
+    public function path()
     {
         return realpath(__DIR__.'/../../bin/Acrylic/');
     }

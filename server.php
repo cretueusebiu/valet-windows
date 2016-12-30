@@ -3,7 +3,6 @@
 /**
  * Define the user's "~/.valet" path.
  */
-
 define('VALET_HOME_PATH', $_SERVER['HOME'].'/.valet');
 define('VALET_STATIC_PREFIX', '41c270e4-5535-4daa-b23e-c269744c2f45');
 
@@ -46,7 +45,7 @@ $valetConfig = json_decode(
  * Parse the URI and site / host for the incoming request.
  */
 $uri = urldecode(
-    explode("?", $_SERVER['REQUEST_URI'])[0]
+    explode('?', $_SERVER['REQUEST_URI'])[0]
 );
 
 $siteName = basename(
@@ -87,11 +86,11 @@ require __DIR__.'/cli/drivers/require.php';
 
 $valetDriver = ValetDriver::assign($valetSitePath, $siteName, $uri);
 
-if (! $valetDriver) {
+if (!$valetDriver) {
     show_valet_404();
 }
 
-/**
+/*
  * Overwrite the HTTP host for Ngrok.
  */
 if (isset($_SERVER['HTTP_X_ORIGINAL_HOST'])) {
@@ -108,7 +107,7 @@ $uri = $valetDriver->mutateUri($uri);
  */
 $isPhpFile = pathinfo($uri, PATHINFO_EXTENSION) === 'php';
 
-if ($uri !== '/' && ! $isPhpFile && $staticFilePath = $valetDriver->isStaticFile($valetSitePath, $siteName, $uri)) {
+if ($uri !== '/' && !$isPhpFile && $staticFilePath = $valetDriver->isStaticFile($valetSitePath, $siteName, $uri)) {
     return $valetDriver->serveStaticFile($staticFilePath, $valetSitePath, $siteName, $uri);
 }
 
@@ -119,7 +118,7 @@ $frontControllerPath = $valetDriver->frontControllerPath(
     $valetSitePath, $siteName, $uri
 );
 
-if (! $frontControllerPath) {
+if (!$frontControllerPath) {
     show_valet_404();
 }
 

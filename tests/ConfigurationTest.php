@@ -1,8 +1,8 @@
 <?php
 
-use Valet\Filesystem;
-use Valet\Configuration;
 use Illuminate\Container\Container;
+use Valet\Configuration;
+use Valet\Filesystem;
 
 class ConfigurationTest extends PHPUnit_Framework_TestCase
 {
@@ -10,15 +10,13 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
     {
         $_SERVER['SUDO_USER'] = user();
 
-        Container::setInstance(new Container);
+        Container::setInstance(new Container());
     }
-
 
     public function tearDown()
     {
         Mockery::close();
     }
-
 
     public function test_configuration_directory_is_created_if_it_doesnt_exist()
     {
@@ -27,7 +25,6 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         swap(Filesystem::class, $files);
         resolve(Configuration::class)->createConfigurationDirectory();
     }
-
 
     public function test_drivers_directory_is_created_with_sample_driver_if_it_doesnt_exist()
     {
@@ -50,7 +47,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
 
     public function test_add_path_adds_a_path_to_the_paths_array_and_removes_duplicates()
     {
-        $config = Mockery::mock(Configuration::class.'[read,write]', [new Filesystem]);
+        $config = Mockery::mock(Configuration::class.'[read,write]', [new Filesystem()]);
         $config->shouldReceive('read')->andReturn([
             'paths' => ['path-1', 'path-2'],
         ]);
@@ -59,7 +56,7 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         ]);
         $config->addPath('path-3');
 
-        $config = Mockery::mock(Configuration::class.'[read,write]', [new Filesystem]);
+        $config = Mockery::mock(Configuration::class.'[read,write]', [new Filesystem()]);
         $config->shouldReceive('read')->andReturn([
             'paths' => ['path-1', 'path-2', 'path-3'],
         ]);
@@ -69,10 +66,9 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         $config->addPath('path-3');
     }
 
-
     public function test_paths_may_be_removed_from_the_configuration()
     {
-        $config = Mockery::mock(Configuration::class.'[read,write]', [new Filesystem]);
+        $config = Mockery::mock(Configuration::class.'[read,write]', [new Filesystem()]);
         $config->shouldReceive('read')->andReturn([
             'paths' => ['path-1', 'path-2'],
         ]);
@@ -81,7 +77,6 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         ]);
         $config->removePath('path-2');
     }
-
 
     public function test_prune_removes_directories_from_paths_that_no_longer_exist()
     {
@@ -100,7 +95,6 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         $config->prune();
     }
 
-
     public function test_prune_doesnt_execute_if_configuration_directory_doesnt_exist()
     {
         $files = Mockery::mock(Filesystem::class.'[exists]');
@@ -112,10 +106,9 @@ class ConfigurationTest extends PHPUnit_Framework_TestCase
         $config->prune();
     }
 
-
     public function test_update_key_updates_the_specified_configuration_key()
     {
-        $config = Mockery::mock(Configuration::class.'[read,write]', [new Filesystem]);
+        $config = Mockery::mock(Configuration::class.'[read,write]', [new Filesystem()]);
         $config->shouldReceive('read')->once()->andReturn(['foo' => 'bar']);
         $config->shouldReceive('write')->once()->with(['foo' => 'bar', 'bar' => 'baz']);
         $config->updateKey('bar', 'baz');

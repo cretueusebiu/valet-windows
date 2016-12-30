@@ -4,13 +4,14 @@ namespace Valet;
 
 class WinSW
 {
-    var $cli, $files;
+    public $cli;
+    public $files;
 
     /**
      * Create a new WinSW instance.
      *
-     * @param  CommandLine  $cli
-     * @param  Filesystem  $files
+     * @param CommandLine $cli
+     * @param Filesystem  $files
      */
     public function __construct(CommandLine $cli, Filesystem $files)
     {
@@ -21,8 +22,9 @@ class WinSW
     /**
      * Install a Windows service.
      *
-     * @param  string $service
-     * @param  array  $args
+     * @param string $service
+     * @param array  $args
+     *
      * @return void
      */
     public function install($service, $args = [])
@@ -50,7 +52,8 @@ class WinSW
     /**
      * Uninstall a Windows service.
      *
-     * @param  string $service
+     * @param string $service
+     *
      * @return void
      */
     public function uninstall($service)
@@ -66,7 +69,8 @@ class WinSW
     /**
      * Restart a Windows service.
      *
-     * @param  string $service
+     * @param string $service
+     *
      * @return void
      */
     public function restart($service)
@@ -87,7 +91,8 @@ class WinSW
     /**
      * Stop a Windows service.
      *
-     * @param  string $service
+     * @param string $service
+     *
      * @return void
      */
     public function stop($service)

@@ -2,19 +2,19 @@
 
 namespace Valet;
 
-use Httpful\Request;
 use DomainException;
+use Httpful\Request;
 
 class Ngrok
 {
-    var $tunnelsEndpoint = 'http://127.0.0.1:4040/api/tunnels';
+    public $tunnelsEndpoint = 'http://127.0.0.1:4040/api/tunnels';
 
     /**
      * Get the current tunnel URL from the Ngrok API.
      *
      * @return string
      */
-    function currentTunnelUrl()
+    public function currentTunnelUrl()
     {
         return retry(20, function () {
             $body = Request::get($this->tunnelsEndpoint)->send()->body;
@@ -25,7 +25,7 @@ class Ngrok
             if (isset($body->tunnels) && count($body->tunnels) > 0) {
                 return $this->findHttpTunnelUrl($body->tunnels);
             } else {
-                throw new DomainException("Tunnel not established.");
+                throw new DomainException('Tunnel not established.');
             }
         }, 250);
     }
@@ -33,10 +33,11 @@ class Ngrok
     /**
      * Find the HTTP tunnel URL from the list of tunnels.
      *
-     * @param  array  $tunnels
+     * @param array $tunnels
+     *
      * @return string|null
      */
-    function findHttpTunnelUrl($tunnels)
+    public function findHttpTunnelUrl($tunnels)
     {
         foreach ($tunnels as $tunnel) {
             if ($tunnel->proto === 'http') {

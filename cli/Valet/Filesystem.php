@@ -9,10 +9,11 @@ class Filesystem
     /**
      * Determine if the given path is a directory.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return bool
      */
-    function isDir($path)
+    public function isDir($path)
     {
         return is_dir($path);
     }
@@ -20,12 +21,13 @@ class Filesystem
     /**
      * Create a directory.
      *
-     * @param  string  $path
-     * @param  string|null  $owner
-     * @param  int  $mode
+     * @param string      $path
+     * @param string|null $owner
+     * @param int         $mode
+     *
      * @return void
      */
-    function mkdir($path, $owner = null, $mode = 0755)
+    public function mkdir($path, $owner = null, $mode = 0755)
     {
         mkdir($path, $mode, true);
 
@@ -37,14 +39,15 @@ class Filesystem
     /**
      * Ensure that the given directory exists.
      *
-     * @param  string  $path
-     * @param  string|null  $owner
-     * @param  int  $mode
+     * @param string      $path
+     * @param string|null $owner
+     * @param int         $mode
+     *
      * @return void
      */
-    function ensureDirExists($path, $owner = null, $mode = 0755)
+    public function ensureDirExists($path, $owner = null, $mode = 0755)
     {
-        if (! $this->isDir($path)) {
+        if (!$this->isDir($path)) {
             $this->mkdir($path, $owner, $mode);
         }
     }
@@ -52,11 +55,12 @@ class Filesystem
     /**
      * Create a directory as the non-root user.
      *
-     * @param  string  $path
-     * @param  int  $mode
+     * @param string $path
+     * @param int    $mode
+     *
      * @return void
      */
-    function mkdirAsUser($path, $mode = 0755)
+    public function mkdirAsUser($path, $mode = 0755)
     {
         return $this->mkdir($path, user(), $mode);
     }
@@ -64,11 +68,12 @@ class Filesystem
     /**
      * Touch the given path.
      *
-     * @param  string  $path
-     * @param  string|null  $owner
+     * @param string      $path
+     * @param string|null $owner
+     *
      * @return string
      */
-    function touch($path, $owner = null)
+    public function touch($path, $owner = null)
     {
         touch($path);
 
@@ -82,10 +87,11 @@ class Filesystem
     /**
      * Touch the given path as the non-root user.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return void
      */
-    function touchAsUser($path)
+    public function touchAsUser($path)
     {
         return $this->touch($path, user());
     }
@@ -93,10 +99,11 @@ class Filesystem
     /**
      * Determine if the given file exists.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return bool
      */
-    function exists($path)
+    public function exists($path)
     {
         return file_exists($path);
     }
@@ -104,10 +111,11 @@ class Filesystem
     /**
      * Read the contents of the given file.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return string
      */
-    function get($path)
+    public function get($path)
     {
         return file_get_contents($path);
     }
@@ -115,12 +123,13 @@ class Filesystem
     /**
      * Write to the given file.
      *
-     * @param  string  $path
-     * @param  string  $contents
-     * @param  string|null  $owner
+     * @param string      $path
+     * @param string      $contents
+     * @param string|null $owner
+     *
      * @return string
      */
-    function put($path, $contents, $owner = null)
+    public function put($path, $contents, $owner = null)
     {
         file_put_contents($path, $contents);
 
@@ -132,11 +141,12 @@ class Filesystem
     /**
      * Write to the given file as the non-root user.
      *
-     * @param  string  $path
-     * @param  string  $contents
+     * @param string $path
+     * @param string $contents
+     *
      * @return string
      */
-    function putAsUser($path, $contents)
+    public function putAsUser($path, $contents)
     {
         return $this->put($path, $contents, user());
     }
@@ -144,12 +154,13 @@ class Filesystem
     /**
      * Append the contents to the given file.
      *
-     * @param  string  $path
-     * @param  string  $contents
-     * @param  string|null  $owner
+     * @param string      $path
+     * @param string      $contents
+     * @param string|null $owner
+     *
      * @return void
      */
-    function append($path, $contents, $owner = null)
+    public function append($path, $contents, $owner = null)
     {
         file_put_contents($path, $contents, FILE_APPEND);
 
@@ -161,11 +172,12 @@ class Filesystem
     /**
      * Append the contents to the given file as the non-root user.
      *
-     * @param  string  $path
-     * @param  string  $contents
+     * @param string $path
+     * @param string $contents
+     *
      * @return void
      */
-    function appendAsUser($path, $contents)
+    public function appendAsUser($path, $contents)
     {
         $this->append($path, $contents, user());
     }
@@ -173,11 +185,12 @@ class Filesystem
     /**
      * Copy the given file to a new location.
      *
-     * @param  string  $from
-     * @param  string  $to
+     * @param string $from
+     * @param string $to
+     *
      * @return void
      */
-    function copy($from, $to)
+    public function copy($from, $to)
     {
         copy($from, $to);
     }
@@ -185,11 +198,12 @@ class Filesystem
     /**
      * Copy the given file to a new location for the non-root user.
      *
-     * @param  string  $from
-     * @param  string  $to
+     * @param string $from
+     * @param string $to
+     *
      * @return void
      */
-    function copyAsUser($from, $to)
+    public function copyAsUser($from, $to)
     {
         copy($from, $to);
 
@@ -199,11 +213,12 @@ class Filesystem
     /**
      * Create a symlink to the given target.
      *
-     * @param  string  $target
-     * @param  string  $link
+     * @param string $target
+     * @param string $link
+     *
      * @return void
      */
-    function symlink($target, $link)
+    public function symlink($target, $link)
     {
         if ($this->exists($link)) {
             $this->unlink($link);
@@ -217,11 +232,12 @@ class Filesystem
      *
      * This uses the command line as PHP can't change symlink permissions.
      *
-     * @param  string  $target
-     * @param  string  $link
+     * @param string $target
+     * @param string $link
+     *
      * @return void
      */
-    function symlinkAsUser($target, $link)
+    public function symlinkAsUser($target, $link)
     {
         if ($this->exists($link)) {
             $this->unlink($link);
@@ -237,17 +253,18 @@ class Filesystem
     /**
      * Delete the file at the given path.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return void
      */
-    function unlink($path)
+    public function unlink($path)
     {
         if ($this->isLink($path)) {
             $dir = pathinfo($path, PATHINFO_DIRNAME);
             $link = pathinfo($path, PATHINFO_BASENAME);
 
             exec("cd \"{$dir}\" && rmdir {$link}");
-        } else if (file_exists($path)) {
+        } elseif (file_exists($path)) {
             @unlink($path);
         }
     }
@@ -255,10 +272,10 @@ class Filesystem
     /**
      * Change the owner of the given path.
      *
-     * @param  string  $path
-     * @param  string  $user
+     * @param string $path
+     * @param string $user
      */
-    function chown($path, $user)
+    public function chown($path, $user)
     {
         chown($path, $user);
     }
@@ -266,10 +283,10 @@ class Filesystem
     /**
      * Change the group of the given path.
      *
-     * @param  string  $path
-     * @param  string  $group
+     * @param string $path
+     * @param string $group
      */
-    function chgrp($path, $group)
+    public function chgrp($path, $group)
     {
         chgrp($path, $group);
     }
@@ -277,10 +294,11 @@ class Filesystem
     /**
      * Resolve the given path.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return string
      */
-    function realpath($path)
+    public function realpath($path)
     {
         return realpath($path);
     }
@@ -288,10 +306,11 @@ class Filesystem
     /**
      * Determine if the given path is a symbolic link.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return bool
      */
-    function isLink($path)
+    public function isLink($path)
     {
         if (is_link($path)) {
             return true;
@@ -303,10 +322,11 @@ class Filesystem
     /**
      * Resolve the given symbolic link.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return string
      */
-    function readLink($path)
+    public function readLink($path)
     {
         return readlink($path);
     }
@@ -314,10 +334,11 @@ class Filesystem
     /**
      * Remove all of the broken symbolic links at the given path.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return void
      */
-    function removeBrokenLinksAt($path)
+    public function removeBrokenLinksAt($path)
     {
         collect($this->scandir($path))
                 ->filter(function ($file) use ($path) {
@@ -331,21 +352,23 @@ class Filesystem
     /**
      * Determine if the given path is a broken symbolic link.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return bool
      */
-    function isBrokenLink($path)
+    public function isBrokenLink($path)
     {
-        return is_link($path) && ! file_exists($path);
+        return is_link($path) && !file_exists($path);
     }
 
     /**
      * Scan the given directory path.
      *
-     * @param  string  $path
+     * @param string $path
+     *
      * @return array
      */
-    function scandir($path)
+    public function scandir($path)
     {
         return collect(scandir($path))
                     ->reject(function ($file) {

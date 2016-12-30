@@ -1,9 +1,9 @@
 <?php
 
-use Valet\Brew;
-use Valet\Filesystem;
-use Valet\CommandLine;
 use Illuminate\Container\Container;
+use Valet\Brew;
+use Valet\CommandLine;
+use Valet\Filesystem;
 
 class BrewTest extends PHPUnit_Framework_TestCase
 {
@@ -11,21 +11,18 @@ class BrewTest extends PHPUnit_Framework_TestCase
     {
         $_SERVER['SUDO_USER'] = user();
 
-        Container::setInstance(new Container);
+        Container::setInstance(new Container());
     }
-
 
     public function tearDown()
     {
         Mockery::close();
     }
 
-
     public function test_brew_can_be_resolved_from_container()
     {
         $this->assertInstanceOf(Brew::class, resolve(Brew::class));
     }
-
 
     public function test_installed_returns_true_when_given_formula_is_installed()
     {
@@ -40,7 +37,6 @@ php71');
         swap(CommandLine::class, $cli);
         $this->assertTrue(resolve(Brew::class)->installed('php71'));
     }
-
 
     public function test_installed_returns_false_when_given_formula_is_not_installed()
     {
@@ -62,31 +58,29 @@ php7');
         $this->assertFalse(resolve(Brew::class)->installed('php71'));
     }
 
-
     public function test_has_installed_php_indicates_if_php_is_installed_via_brew()
     {
-        $brew = Mockery::mock(Brew::class.'[installed]', [new CommandLine, new Filesystem]);
+        $brew = Mockery::mock(Brew::class.'[installed]', [new CommandLine(), new Filesystem()]);
         $brew->shouldReceive('installed')->once()->with('php71')->andReturn(true);
         $brew->shouldReceive('installed')->with('php70')->andReturn(true);
         $brew->shouldReceive('installed')->with('php56')->andReturn(true);
         $brew->shouldReceive('installed')->with('php55')->andReturn(true);
         $this->assertTrue($brew->hasInstalledPhp());
 
-        $brew = Mockery::mock(Brew::class.'[installed]', [new CommandLine, new Filesystem]);
+        $brew = Mockery::mock(Brew::class.'[installed]', [new CommandLine(), new Filesystem()]);
         $brew->shouldReceive('installed')->once()->with('php70')->andReturn(true);
         $brew->shouldReceive('installed')->with('php71')->andReturn(false);
         $brew->shouldReceive('installed')->with('php56')->andReturn(false);
         $brew->shouldReceive('installed')->with('php55')->andReturn(false);
         $this->assertTrue($brew->hasInstalledPhp());
 
-        $brew = Mockery::mock(Brew::class.'[installed]', [new CommandLine, new Filesystem]);
+        $brew = Mockery::mock(Brew::class.'[installed]', [new CommandLine(), new Filesystem()]);
         $brew->shouldReceive('installed')->once()->with('php71')->andReturn(false);
         $brew->shouldReceive('installed')->once()->with('php70')->andReturn(false);
         $brew->shouldReceive('installed')->once()->with('php56')->andReturn(false);
         $brew->shouldReceive('installed')->once()->with('php55')->andReturn(false);
         $this->assertFalse($brew->hasInstalledPhp());
     }
-
 
     public function test_tap_taps_the_given_homebrew_repository()
     {
@@ -98,7 +92,6 @@ php7');
         resolve(Brew::class)->tap('php71', 'php70', 'php56');
     }
 
-
     public function test_restart_restarts_the_service_using_homebrew_services()
     {
         $cli = Mockery::mock(CommandLine::class);
@@ -107,7 +100,6 @@ php7');
         resolve(Brew::class)->restartService('dnsmasq');
     }
 
-
     public function test_stop_stops_the_service_using_homebrew_services()
     {
         $cli = Mockery::mock(CommandLine::class);
@@ -115,7 +107,6 @@ php7');
         swap(CommandLine::class, $cli);
         resolve(Brew::class)->stopService('dnsmasq');
     }
-
 
     public function test_linked_php_returns_linked_php_formula_name()
     {
@@ -132,7 +123,6 @@ php7');
         $this->assertSame('php56', resolve(Brew::class)->linkedPhp());
     }
 
-
     /**
      * @expectedException DomainException
      */
@@ -143,7 +133,6 @@ php7');
         swap(Filesystem::class, $files);
         resolve(Brew::class)->linkedPhp();
     }
-
 
     /**
      * @expectedException DomainException
@@ -157,7 +146,6 @@ php7');
         resolve(Brew::class)->linkedPhp();
     }
 
-
     public function test_install_or_fail_will_install_brew_formulas()
     {
         $cli = Mockery::mock(CommandLine::class);
@@ -166,17 +154,15 @@ php7');
         resolve(Brew::class)->installOrFail('dnsmasq');
     }
 
-
     public function test_install_or_fail_can_install_taps()
     {
         $cli = Mockery::mock(CommandLine::class);
         $cli->shouldReceive('runAsUser')->once()->with('brew install dnsmasq', Mockery::type('Closure'));
         swap(CommandLine::class, $cli);
-        $brew = Mockery::mock(Brew::class.'[tap]', [$cli, new Filesystem]);
+        $brew = Mockery::mock(Brew::class.'[tap]', [$cli, new Filesystem()]);
         $brew->shouldReceive('tap')->once()->with(['test/tap']);
         $brew->installOrFail('dnsmasq', [], ['test/tap']);
     }
-
 
     /**
      * @expectedException DomainException

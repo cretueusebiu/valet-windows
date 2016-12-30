@@ -11,10 +11,9 @@ class FilesystemTest extends PHPUnit_Framework_TestCase
         touch(__DIR__.'/output/.gitkeep');
     }
 
-
     public function test_remove_broken_links_removes_broken_symlinks()
     {
-        $files = new Filesystem;
+        $files = new Filesystem();
         file_put_contents(__DIR__.'/output/file.out', 'test');
         symlink(__DIR__.'/output/file.out', __DIR__.'/output/file.link');
         $this->assertFileExists(__DIR__.'/output/file.link');

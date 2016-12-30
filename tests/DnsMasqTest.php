@@ -1,10 +1,10 @@
 <?php
 
+use Illuminate\Container\Container;
 use Valet\Brew;
+use Valet\CommandLine;
 use Valet\DnsMasq;
 use Valet\Filesystem;
-use Valet\CommandLine;
-use Illuminate\Container\Container;
 
 class DnsMasqTest extends PHPUnit_Framework_TestCase
 {
@@ -12,9 +12,8 @@ class DnsMasqTest extends PHPUnit_Framework_TestCase
     {
         $_SERVER['SUDO_USER'] = user();
 
-        Container::setInstance(new Container);
+        Container::setInstance(new Container());
     }
-
 
     public function tearDown()
     {
@@ -24,7 +23,6 @@ class DnsMasqTest extends PHPUnit_Framework_TestCase
 
         Mockery::close();
     }
-
 
     public function test_install_installs_and_places_configuration_files_in_proper_locations()
     {
@@ -49,17 +47,15 @@ conf-file='.__DIR__.'/output/custom-dnsmasq.conf
 ', file_get_contents(__DIR__.'/output/dnsmasq.conf'));
     }
 
-
     public function test_update_domain_removes_old_resolver_and_reinstalls()
     {
         $cli = Mockery::mock(CommandLine::class);
         $cli->shouldReceive('quietly')->with('rm /etc/resolver/old');
-        $dnsMasq = Mockery::mock(DnsMasq::class.'[install]', [resolve(Brew::class), $cli, new Filesystem]);
+        $dnsMasq = Mockery::mock(DnsMasq::class.'[install]', [resolve(Brew::class), $cli, new Filesystem()]);
         $dnsMasq->shouldReceive('install')->with('new');
         $dnsMasq->updateDomain('old', 'new');
     }
 }
-
 
 class StubForCreatingCustomDnsMasqConfigFiles extends DnsMasq
 {

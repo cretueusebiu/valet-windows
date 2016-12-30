@@ -2,30 +2,28 @@
 
 namespace Valet;
 
-use ZipArchive;
-use DomainException;
-
 class Nginx
 {
-    var $cli;
-    var $files;
-    var $configuration;
-    var $site;
-    var $winsw;
+    public $cli;
+    public $files;
+    public $configuration;
+    public $site;
+    public $winsw;
 
     const SERVICE = 'nginxservice';
 
     /**
      * Create a new Nginx instance.
      *
-     * @param  CommandLine  $cli
-     * @param  Filesystem  $files
-     * @param  Configuration  $configuration
-     * @param  Site  $site
-     * @param  WinSW  $winsw
+     * @param CommandLine   $cli
+     * @param Filesystem    $files
+     * @param Configuration $configuration
+     * @param Site          $site
+     * @param WinSW         $winsw
+     *
      * @return void
      */
-    function __construct(CommandLine $cli, Filesystem $files,
+    public function __construct(CommandLine $cli, Filesystem $files,
                          Configuration $configuration, Site $site, WinSW $winsw)
     {
         $this->cli = $cli;
@@ -40,7 +38,7 @@ class Nginx
      *
      * @return void
      */
-    function install()
+    public function install()
     {
         $this->installConfiguration();
         $this->installServer();
@@ -53,7 +51,7 @@ class Nginx
      *
      * @return void
      */
-    function installConfiguration()
+    public function installConfiguration()
     {
         $contents = $this->files->get(__DIR__.'/../stubs/nginx.conf');
 
@@ -68,7 +66,7 @@ class Nginx
      *
      * @return void
      */
-    function installServer()
+    public function installServer()
     {
         $this->files->ensureDirExists($this->path().'/valet');
 
@@ -94,9 +92,9 @@ class Nginx
      *
      * @return void
      */
-    function installNginxDirectory()
+    public function installNginxDirectory()
     {
-        if (! $this->files->isDir($nginxDirectory = VALET_HOME_PATH.'/Nginx')) {
+        if (!$this->files->isDir($nginxDirectory = VALET_HOME_PATH.'/Nginx')) {
             $this->files->mkdirAsUser($nginxDirectory);
         }
 
@@ -110,7 +108,7 @@ class Nginx
      *
      * @return void
      */
-    function rewriteSecureNginxFiles()
+    public function rewriteSecureNginxFiles()
     {
         $domain = $this->configuration->read()['domain'];
 
@@ -122,12 +120,12 @@ class Nginx
      *
      * @return void
      */
-    function installService()
+    public function installService()
     {
         $this->uninstall();
 
         $this->winsw->install(static::SERVICE, [
-            'NGINX_PATH' => realpath(__DIR__."/../../bin/nginx"),
+            'NGINX_PATH' => realpath(__DIR__.'/../../bin/nginx'),
         ]);
     }
 
@@ -136,7 +134,7 @@ class Nginx
      *
      * @return void
      */
-    function restart()
+    public function restart()
     {
         $this->stop();
 
@@ -148,7 +146,7 @@ class Nginx
      *
      * @return void
      */
-    function stop()
+    public function stop()
     {
         $this->winsw->stop(static::SERVICE);
 
@@ -160,7 +158,7 @@ class Nginx
      *
      * @return void
      */
-    function uninstall()
+    public function uninstall()
     {
         $this->winsw->uninstall(static::SERVICE);
     }
@@ -170,7 +168,7 @@ class Nginx
      *
      * @return string
      */
-    function path()
+    public function path()
     {
         return realpath(__DIR__.'/../../bin/nginx');
     }

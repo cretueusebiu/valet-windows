@@ -1,7 +1,7 @@
 <?php
 
-use Valet\PhpFpm;
 use Illuminate\Container\Container;
+use Valet\PhpFpm;
 
 class PhpFpmTest extends PHPUnit_Framework_TestCase
 {
@@ -9,9 +9,8 @@ class PhpFpmTest extends PHPUnit_Framework_TestCase
     {
         $_SERVER['SUDO_USER'] = user();
 
-        Container::setInstance(new Container);
+        Container::setInstance(new Container());
     }
-
 
     public function tearDown()
     {
@@ -29,14 +28,13 @@ class PhpFpmTest extends PHPUnit_Framework_TestCase
         $contents = file_get_contents(__DIR__.'/output/fpm.conf');
         $this->assertContains(sprintf("\nuser = %s", user()), $contents);
         $this->assertContains("\ngroup = staff", $contents);
-        $this->assertContains("\nlisten = ".VALET_HOME_PATH."/valet.sock", $contents);
+        $this->assertContains("\nlisten = ".VALET_HOME_PATH.'/valet.sock', $contents);
     }
 }
 
-
 class StubForUpdatingFpmConfigFiles extends PhpFpm
 {
-    function fpmConfigPath()
+    public function fpmConfigPath()
     {
         return __DIR__.'/output/fpm.conf';
     }

@@ -5,9 +5,10 @@ class SculpinValetDriver extends BasicValetDriver
     /**
      * Determine if the driver serves the request.
      *
-     * @param  string  $sitePath
-     * @param  string  $siteName
-     * @param  string  $uri
+     * @param string $sitePath
+     * @param string $siteName
+     * @param string $uri
+     *
      * @return bool
      */
     public function serves($sitePath, $siteName, $uri)
@@ -18,7 +19,8 @@ class SculpinValetDriver extends BasicValetDriver
     /**
      * Mutate the incoming URI.
      *
-     * @param  string  $uri
+     * @param string $uri
+     *
      * @return string
      */
     public function mutateUri($uri)
