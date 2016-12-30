@@ -60,7 +60,7 @@ class Acrylic
     {
         $this->stop();
 
-        $this->createConfigFile($domain);
+        $this->createConfigFile($newDomain);
 
         $this->restart();
     }
