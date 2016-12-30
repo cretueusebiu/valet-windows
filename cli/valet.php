@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /**
@@ -105,7 +104,7 @@ $app->command('link [name]', function ($name) {
  * Display all of the registered symbolic links.
  */
 $app->command('links', function () {
-    passthru('ls -la '.VALET_HOME_PATH.'/Sites');
+    Site::links();
 })->descriptions('Display all of the registered Valet links');
 
 /**

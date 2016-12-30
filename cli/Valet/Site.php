@@ -75,6 +75,20 @@ class Site
     }
 
     /**
+     * Display all of the registered symbolic links.
+     *
+     * @return void
+     */
+    function links()
+    {
+        $path = realpath(VALET_HOME_PATH.'/Sites');
+
+        echo $this->cli->run("ls -la $path", function ($code) use ($path) {
+            die($this->cli->run("dir /AL $path"));
+        });
+    }
+
+    /**
      * Remove all broken symbolic links.
      *
      * @return void
