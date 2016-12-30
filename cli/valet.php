@@ -187,7 +187,10 @@ $app->command('paths', function () {
  * Generate a publicly accessible URL for your project.
  */
 $app->command('share', function () {
-    warning("It looks like you are running `cli/valet.php` directly, please use the `valet` script in the project root instead.");
+    $host = basename(getcwd());
+    $domain = Configuration::read()['domain'];
+
+    passthru("start ".__DIR__."/../bin/ngrok http $host.$domain:80 -host-header=rewrite");
 })->descriptions('Generate a publicly accessible URL for your project');
 
 /**

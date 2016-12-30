@@ -3,6 +3,10 @@
 use Illuminate\Container\Container;
 use Symfony\Component\Process\Process;
 
+if (!isset($_SERVER['HOME'])) {
+    $_SERVER['HOME'] = $_SERVER['USERPROFILE'];
+}
+
 /**
  * Define the ~/.valet path as a constant.
  */
