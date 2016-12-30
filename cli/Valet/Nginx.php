@@ -138,6 +138,8 @@ class Nginx
      */
     function restart()
     {
+        $this->stop();
+
         $this->winsw->restart(static::SERVICE);
     }
 
