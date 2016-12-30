@@ -15,13 +15,13 @@ Before installation, you should make sure that no other programs such as Apache 
 - If you don't have PHP installed, open PowerShell as Administrator and run: 
 
 ```bash
-wget https://github.com/cretueusebiu/valet/raw/master/bin/php-installer.ps1 -OutFile $env:temp\php-installer.ps1; ."$env:temp\php-installer.ps1"
+wget https://github.com/cretueusebiu/valet-windows/raw/master/bin/php-installer.ps1 -OutFile $env:temp\php-installer.ps1; ."$env:temp\php-installer.ps1"
 ``` 
 > This script will download and install PHP 7.1 for you and add PHP to your environment Path variable.
 
 - If you don't have Composer installed, make sure to [install](https://getcomposer.org/Composer-Setup.exe) it.
 
-- Install Valet with Composer via `composer global require cretueusebiu/valet`.
+- Install Valet with Composer via `composer global require cretueusebiu/valet-windows`.
 
 - Run the `valet install` command. This will configure and install Valet and register Valet's daemon to launch when your system starts.
 

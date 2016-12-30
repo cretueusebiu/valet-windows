@@ -74,7 +74,7 @@ class Valet
      */
     function onLatestVersion($currentVersion)
     {
-        $response = \Httpful\Request::get('https://api.github.com/repos/cretueusebiu/valet/releases/latest')->send();
+        $response = \Httpful\Request::get('https://api.github.com/repos/cretueusebiu/valet-windows/releases/latest')->send();
 
         return version_compare($currentVersion, trim($response->body->tag_name, 'v'), '>=');
     }

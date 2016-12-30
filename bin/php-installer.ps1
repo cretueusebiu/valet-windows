@@ -1,5 +1,5 @@
 $phpUrl = "http://windows.php.net/downloads/releases/php-7.1.0-nts-Win32-VC14-x86.zip"
-$phpIniUrl = "https://raw.githubusercontent.com/cretueusebiu/valet/master/cli/stubs/php.ini"
+$phpIniUrl = "https://raw.githubusercontent.com/cretueusebiu/valet-windows/master/cli/stubs/php.ini"
 $zipfile = "$PSScriptRoot\php.zip"
 $outpath = "C:\php"
 
