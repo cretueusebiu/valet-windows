@@ -3,6 +3,8 @@
 namespace Valet;
 
 use DomainException;
+use phpseclib\Crypt\RSA;
+use phpseclib\File\X509;
 
 class Site
 {
@@ -154,10 +156,7 @@ class Site
 
         $this->createPrivateKey($keyPath);
         $this->createSigningRequest($url, $keyPath, $csrPath);
-
-        $this->cli->run(sprintf(
-            'openssl x509 -req -days 365 -in %s -signkey %s -out %s', $csrPath, $keyPath, $crtPath
-        ));
+        $this->createSignedCertificate($keyPath, $csrPath, $crtPath);
 
         $this->trustCertificate($crtPath);
     }
@@ -170,7 +169,9 @@ class Site
      */
     function createPrivateKey($keyPath)
     {
-        $this->cli->run(sprintf('openssl genrsa -out %s 2048', $keyPath));
+        $key = (new RSA())->createKey(2048);
+
+        $this->files->putAsUser($keyPath, $key['privatekey']);
     }
 
     /**
@@ -181,10 +182,45 @@ class Site
      */
     function createSigningRequest($url, $keyPath, $csrPath)
     {
-        $this->cli->run(sprintf(
-            'openssl req -new -subj "/C=/ST=/O=/localityName=/commonName=%s/organizationalUnitName=/emailAddress=/" -key %s -out %s -passin pass:',
-            $url, $keyPath, $csrPath
-        ));
+        $privKey = new RSA();
+        $privKey->loadKey($this->files->get($keyPath));
+
+        $x509 = new X509();
+        $x509->setPrivateKey($privKey);
+        $x509->setDNProp('commonname', $url);
+
+        $csr = $x509->saveCSR($x509->signCSR());
+
+        $this->files->putAsUser($csrPath, $csr);
+    }
+
+    /**
+     * Create the signed TLS certificate.
+     *
+     * @param  string $keyPath
+     * @param  string $csrPath
+     * @param  string $crtPath
+     * @return void
+     */
+    function createSignedCertificate($keyPath, $csrPath, $crtPath)
+    {
+        $privKey = new RSA();
+        $privKey->loadKey($this->files->get($keyPath));
+
+        $subject = new X509();
+        $subject->loadCSR($this->files->get($csrPath));
+
+        $issuer = new X509();
+        $issuer->setPrivateKey($privKey);
+        $issuer->setDN($subject->getDN());
+
+        $x509 = new X509();
+        $x509->makeCA();
+
+        $result = $x509->sign($issuer, $subject, 'sha256WithRSAEncryption');
+        $certificate = $x509->saveX509($result);
+
+        $this->files->putAsUser($crtPath, $certificate);
     }
 
     /**
