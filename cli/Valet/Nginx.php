@@ -149,6 +149,8 @@ class Nginx
     function stop()
     {
         $this->winsw->stop(static::SERVICE);
+
+        $this->cli->run('cmd "/C taskkill /IM nginx.exe /F"');
     }
 
     /**
