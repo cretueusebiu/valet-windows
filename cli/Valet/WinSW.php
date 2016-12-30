@@ -42,7 +42,7 @@ class WinSW
 
         $command = 'cmd "/C cd '.VALET_HOME_PATH.'\Services && '.$service.' install"';
 
-        $this->cli->runOrDie($command, function ($code, $output) {
+        $this->cli->runOrDie($command, function () use ($service) {
             warning("Could not install the $service service.");
         });
     }
@@ -75,8 +75,12 @@ class WinSW
 
         $command = 'cmd "/C cd '.VALET_HOME_PATH.'\Services && '.$service.' start"';
 
-        $this->cli->runOrDie($command, function ($code, $output) {
-            warning("Could not start the $service service.");
+        $this->cli->run($command, function () use ($service, $command) {
+            sleep(2);
+
+            $this->cli->runOrDie($command, function () use ($service, $command) {
+                warning("Could not start the $service service.");
+            });
         });
     }
 
