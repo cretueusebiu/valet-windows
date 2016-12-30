@@ -136,7 +136,7 @@ class Site
         $this->createCertificate($url);
 
         $this->files->putAsUser(
-            VALET_HOME_PATH.'/Nginx/'.$url, $this->buildSecureNginxServer($url)
+            VALET_HOME_PATH."/Nginx/$url.conf", $this->buildSecureNginxServer($url)
         );
     }
 
@@ -155,7 +155,7 @@ class Site
         $this->createPrivateKey($keyPath);
         $this->createSigningRequest($url, $keyPath, $csrPath);
 
-        $this->cli->runAsUser(sprintf(
+        $this->cli->run(sprintf(
             'openssl x509 -req -days 365 -in %s -signkey %s -out %s', $csrPath, $keyPath, $crtPath
         ));
 
@@ -170,7 +170,7 @@ class Site
      */
     function createPrivateKey($keyPath)
     {
-        $this->cli->runAsUser(sprintf('openssl genrsa -out %s 2048', $keyPath));
+        $this->cli->run(sprintf('openssl genrsa -out %s 2048', $keyPath));
     }
 
     /**
@@ -181,7 +181,7 @@ class Site
      */
     function createSigningRequest($url, $keyPath, $csrPath)
     {
-        $this->cli->runAsUser(sprintf(
+        $this->cli->run(sprintf(
             'openssl req -new -subj "/C=/ST=/O=/localityName=/commonName=%s/organizationalUnitName=/emailAddress=/" -key %s -out %s -passin pass:',
             $url, $keyPath, $csrPath
         ));
@@ -195,9 +195,7 @@ class Site
      */
     function trustCertificate($crtPath)
     {
-        $this->cli->run(sprintf(
-            'sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain %s', $crtPath
-        ));
+        $this->cli->run(sprintf('cmd "/C certutil -addstore "Root" "%s""', $crtPath));
     }
 
     /**
@@ -211,8 +209,8 @@ class Site
         $path = $this->certificatesPath();
 
         return str_replace(
-            ['VALET_HOME_PATH', 'VALET_SERVER_PATH', 'VALET_STATIC_PREFIX', 'VALET_SITE', 'VALET_CERT', 'VALET_KEY'],
-            [VALET_HOME_PATH, VALET_SERVER_PATH, VALET_STATIC_PREFIX, $url, $path.'/'.$url.'.crt', $path.'/'.$url.'.key'],
+            ['VALET_HOME_PATH', 'VALET_SERVER_PATH', 'VALET_STATIC_PREFIX', 'VALET_SITE', 'VALET_CERT', 'VALET_KEY', 'HOME_PATH'],
+            [VALET_HOME_PATH, VALET_SERVER_PATH, VALET_STATIC_PREFIX, $url, $path.'/'.$url.'.crt', $path.'/'.$url.'.key', $_SERVER['HOME']],
             $this->files->get(__DIR__.'/../stubs/secure.valet.conf')
         );
     }
@@ -226,13 +224,13 @@ class Site
     function unsecure($url)
     {
         if ($this->files->exists($this->certificatesPath().'/'.$url.'.crt')) {
-            $this->files->unlink(VALET_HOME_PATH.'/Nginx/'.$url);
+            $this->files->unlink(VALET_HOME_PATH."/Nginx/$url.conf");
 
             $this->files->unlink($this->certificatesPath().'/'.$url.'.key');
             $this->files->unlink($this->certificatesPath().'/'.$url.'.csr');
             $this->files->unlink($this->certificatesPath().'/'.$url.'.crt');
 
-            $this->cli->run(sprintf('sudo security delete-certificate -c "%s" -t', $url));
+            $this->cli->run(sprintf('cmd "/C certutil -delstore "Root" "%s""', $url));
         }
     }
 
