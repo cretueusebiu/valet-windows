@@ -3,7 +3,7 @@
   <name>valet_phpfpm</name>
   <description>Valet PHP-FPM</description>
   <executable>PHP_PATH\php-cgi.exe</executable>
-  <arguments>-b 127.0.0.1:9000</arguments>
+  <arguments>-b 127.0.0.1:9001</arguments>
   <logpath>VALET_HOME_PATH\Log\</logpath>
   <logmode>reset</logmode>
   <onfailure action="restart"/>
