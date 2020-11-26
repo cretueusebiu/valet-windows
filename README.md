@@ -19,7 +19,7 @@ Laravel Valet configures your Windows to always run Nginx in the background when
 
 Before installation, make sure that no other programs such as Apache or Nginx are binding to your local machine's port 80. <br> Also make sure to open your preferred terminal (CMD, Git Bash, PowerShell, etc.) as Administrator.
 
--   If you don't have PHP installed, open PowerShell (3.0+) as Administrator and run:
+- If you don't have PHP installed, open PowerShell (3.0+) as Administrator and run:
 
 ```bash
 # PHP 8.0
