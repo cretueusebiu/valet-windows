@@ -31,13 +31,13 @@ Set-ExecutionPolicy RemoteSigned; [System.Net.ServicePointManager]::SecurityProt
 
 > This script will download and install PHP for you and add it to your environment path variable. PowerShell is only required for this step.
 
--   If you don't have Composer installed, make sure to [install](https://getcomposer.org/Composer-Setup.exe) it.
+- If you don't have Composer installed, make sure to [install](https://getcomposer.org/Composer-Setup.exe) it.
 
--   Install Valet with Composer via `composer global require cretueusebiu/valet-windows`.
+- Install Valet with Composer via `composer global require cretueusebiu/valet-windows`.
 
--   Run the `valet install` command. This will configure and install Valet and register Valet's daemon to launch when your system starts.
+- Run the `valet install` command. This will configure and install Valet and register Valet's daemon to launch when your system starts.
 
--   If you're installing on Windows 10, you may need to [manually configure](http://mayakron.altervista.org/wikibase/show.php?id=AcrylicWindows10Configuration) Windows to use the Acrylic DNS proxy.
+- If you're installing on Windows 10, you may need to [manually configure](http://mayakron.altervista.org/wikibase/show.php?id=AcrylicWindows10Configuration) Windows to use the Acrylic DNS proxy.
 
 Valet will automatically start its daemon each time your machine boots. There is no need to run `valet start` or `valet install` ever again once the initial Valet installation is complete.
 
@@ -45,13 +45,13 @@ For more please refer to the official documentation on the [Laravel website](htt
 
 ## Known Issues
 
--   When sharing sites the url will not be copied to the clipboard.
--   You must run the `valet` commands from the drive where Valet is installed, except for park and link. See [#12](https://github.com/cretueusebiu/valet-windows/issues/12#issuecomment-283111834).
--   If your machine is not connected to the internet you'll have to manually add the domains in your `hosts` file or you can install the "Microsoft Loopback Adapter" as this simulates an active local network interface that Valet can bind too.
+- When sharing sites the url will not be copied to the clipboard.
+- You must run the `valet` commands from the drive where Valet is installed, except for park and link. See [#12](https://github.com/cretueusebiu/valet-windows/issues/12#issuecomment-283111834).
+- If your machine is not connected to the internet you'll have to manually add the domains in your `hosts` file or you can install the "Microsoft Loopback Adapter" as this simulates an active local network interface that Valet can bind too.
 
 ## Useful Links
 
--   [Install ImageMagick](https://mlocati.github.io/articles/php-windows-imagick.html)
+- [Install ImageMagick](https://mlocati.github.io/articles/php-windows-imagick.html)
 
 ## Changelog
 
