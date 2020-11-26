@@ -114,7 +114,7 @@ class Nginx
      */
     public function rewriteSecureNginxFiles()
     {
-        if(is_array($config = $this->configuration->read())) {
+        if (is_array($config = $this->configuration->read())) {
             $tld = $config['tld'];
 
             $this->site->resecureForNewTld($tld, $tld);
