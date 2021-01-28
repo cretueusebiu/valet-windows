@@ -138,14 +138,12 @@ foreach ($valetConfig['paths'] as $path) {
                 continue;
             }
 
-            // OLD: match dir for lowercase, because Nginx only tells us lowercase names
-            // Some further investigation needs to be done into this as in my case Nginx returned the correctly cased names.
-            // The strtolower() was causing my install to give a 404 error outlined in issue #159 for any folder that contained upper case characters.
-            if ($file === $siteName) {
+           
+            if (strtolower($file) === strtolower($siteName)) {
                 $valetSitePath = $path.'/'.$file;
                 break;
             }
-            if ($file === $domain) {
+            if (strtolower($file) === strtolower($domain)) {
                 $valetSitePath = $path.'/'.$file;
             }
         }
