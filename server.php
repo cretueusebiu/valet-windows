@@ -138,7 +138,6 @@ foreach ($valetConfig['paths'] as $path) {
                 continue;
             }
 
-           
             if (strtolower($file) === strtolower($siteName)) {
                 $valetSitePath = $path.'/'.$file;
                 break;
