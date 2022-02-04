@@ -40,7 +40,7 @@ Set-ExecutionPolicy RemoteSigned -Scope Process; [System.Net.ServicePointManager
 
 - Run the `valet install` command. This will configure and install Valet and register Valet's daemon to launch when your system starts.
 
-- If you're installing on Windows 10, you may need to [manually configure](http://mayakron.altervista.org/wikibase/show.php?id=AcrylicWindows10Configuration) Windows to use the Acrylic DNS proxy.
+- If you're installing on Windows 10, you may need to [manually configure](https://mayakron.altervista.org/support/acrylic/Windows10Configuration.htm) Windows to use the Acrylic DNS proxy (**if you don't configure it, this can causes internet access failures as the DNS settings are changed**).
 
 Valet will automatically start its daemon each time your machine boots. There is no need to run `valet start` or `valet install` ever again once the initial Valet installation is complete.
 
