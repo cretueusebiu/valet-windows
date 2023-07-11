@@ -241,15 +241,16 @@ if (is_dir(VALET_HOME_PATH)) {
      * Generate a publicly accessible URL for your project.
      */
     // TODO: custom domain and ngrok params
-    $app->command('share [domain] [--authtoken=] [--host-header=] [--hostname=] [--region=] [--subdomain=]',
-        function ($domain = null, $authtoken = null, $hostheader = null, $hostname = null, $region = null, $subdomain = null) {
-            $url = ($domain ?: strtolower(Site::host(getcwd()))).'.'.Configuration::read()['tld'];
+    $app->command('share [local_domain] [--authtoken=] [--host-header=] [--hostname=] [--region=] [--domain=] [--subdomain=]',
+        function ($local_domain = null, $authtoken = null, $hostheader = null, $hostname = null, $region = null, $domain = null, $subdomain = null) {
+            $url = ($local_domain ?: strtolower(Site::host(getcwd()))).'.'.Configuration::read()['tld'];
 
             Ngrok::start($url, Site::port($url), array_filter([
                 'authtoken' => $authtoken,
                 'host-header' => $hostheader,
                 'hostname' => $hostname,
                 'region' => $region,
+                'domain' => $domain,
                 'subdomain' => $subdomain,
             ]));
         })->defaults([
