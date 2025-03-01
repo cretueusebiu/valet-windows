@@ -44,6 +44,112 @@ if (is_dir(VALET_HOME_PATH)) {
 }
 
 /**
+ * Add PHP.
+ */
+$app->command('php:add [path]', function ($path) {
+    info("Adding {$path}...");
+
+    if ($php = Configuration::addPhp($path)) {
+        \PhpCgi::install($php['version']);
+
+        \PhpCgiXdebug::install($php['version']);
+
+        info("PHP {$php['version']} from {$path} has been added. You can make it default by running `valet use` command");
+    }
+})->descriptions('Add PHP by specifying a path');
+
+/**
+ * Remove PHP.
+ */
+$app->command('php:remove [path]', function ($path) {
+    info("Removing {$path}...");
+
+    $config = Configuration::read();
+    $defaultPhp = $config['default_php'];
+    $php = Configuration::getPhp($path);
+
+    if ($php['version'] === $defaultPhp) {
+        warning("Default PHP {$php['version']} cannot be removed. Change default PHP version by running [valet use VERSION]");
+
+        return;
+    }
+
+    if ($php) {
+        \PhpCgi::uninstall($php['version']);
+
+        \PhpCgiXdebug::uninstall($php['version']);
+    }
+
+    if (Configuration::removePhp($path)) {
+        info("PHP {$php['version']} from {$path} has been removed.");
+    }
+})->descriptions('Remove PHP by specifying a path');
+
+/**
+ * Install PHP services.
+ */
+$app->command('php:install', function () {
+    info('Reinstalling services...');
+
+    PhpCgi::uninstall();
+
+    PhpCgi::install();
+})->descriptions('Reinstall all PHP services from [valet php:list]');
+
+/**
+ * Uninstall PHP services.
+ */
+$app->command('php:uninstall', function () {
+    info('Uninstalling PHP services...');
+
+    PhpCgi::uninstall();
+
+    info('PHP services uninstalled. Run php:install to install again');
+})->descriptions('Uninstall all PHP services from [valet php:list]');
+
+/**
+ * List all PHP services.
+ */
+$app->command('php:list', function () {
+    info('Listing PHP services...');
+
+    $config = Configuration::read();
+    $defaultPhpVersion = $config['default_php'];
+
+    $php = $config['php'] ?? [];
+
+    $php = collect($php)->map(function ($item) use ($defaultPhpVersion) {
+        $item['default'] = $defaultPhpVersion === $item['version'] ? 'X' : '';
+
+        return $item;
+    })->toArray();
+
+    table(['Version', 'Path', 'Port', 'xDebug Port', 'Default'], $php);
+})->descriptions('List all PHP services');
+
+/**
+ * Install PHP xDebug services.
+ */
+$app->command('xdebug:install', function () {
+    info('Reinstalling xDebug services...');
+
+    PhpCgiXdebug::uninstall();
+
+    PhpCgiXdebug::install();
+})->descriptions('Reinstall all PHP xDebug services from [valet php:list]');
+
+/**
+ * uninstall PHP xDebug services.
+ */
+$app->command('xdebug:uninstall', function () {
+    info('Uninstalling xDebug services...');
+
+    PhpCgiXdebug::uninstall();
+
+    info('xDebug services uninstalled. Run xdebug:install to install again');
+})->descriptions('Uninstall all PHP xDebug services from [valet php:list]');
+
+/**
  * Install Valet and any required services.
  */
 $app->command('install', function () {
@@ -95,6 +201,8 @@ if (is_dir(VALET_HOME_PATH)) {
     $app->command('park [path]', function ($path = null) {
         Configuration::addPath($path ?: getcwd());
 
+//        Site::publishParkedNginxConf($path ?: getcwd());
+
         info(($path === null ? 'This' : "The [{$path}]")." directory has been added to Valet's paths.");
     })->descriptions('Register the current working (or specified) directory with Valet');
 
@@ -106,6 +214,16 @@ if (is_dir(VALET_HOME_PATH)) {
 
         table(['Site', 'SSL', 'URL', 'Path'], $parked->all());
     })->descriptions('Display all the current sites within parked paths');
+
+//    /**
+//     * Get all the current sites within paths parked with 'park {path}'.
+//     */
+//    $app->command('nginx:publish', function ($type) {
+//        if($type === 'nginx') {
+//            Site::publishNginxConf();
+//        }
+//
+//    })->descriptions('Publish ');
 
     /**
      * Remove the current working directory from the paths configuration.
@@ -444,10 +562,47 @@ if (is_dir(VALET_HOME_PATH)) {
 
     /**
      * Allow the user to change the version of php valet uses.
+     *
+     *  @param string $phpVersion can be 'default' or PHP version eg. 8.1.12
      */
-    $app->command('use [phpVersion] [--force]', function ($phpVersion, $force) {
-        warning('This command is not available for Windows.');
-    })->descriptions('This command is not available for Windows.');
+    $app->command('use [phpVersion] [--site=]', function ($phpVersion, $site) {
+        if (empty($phpVersion)) {
+            warning('Please enter a PHP version. Example command [valet use 7.3]');
+
+            return;
+        }
+
+        if ($site) {
+            Site::usePhp($phpVersion, $site);
+
+            return;
+        }
+
+        $php = Configuration::getPhpByVersion($phpVersion);
+
+        if (empty($php)) {
+            warning("Cannot find PHP [$phpVersion] in the list. Example command [valet use 7.3]");
+        }
+
+        info("Setting the default PHP version to [$phpVersion].");
+
+        Configuration::updateKey('default_php', $php['version']);
+
+        info('Stopping Nginx...');
+        Nginx::stop();
+
+        Nginx::installConfiguration();
+        Nginx::installServer();
+        Nginx::installNginxDirectory();
+        Nginx::installService();
+        Nginx::restart();
+
+        info(sprintf('Valet is now using %s.', $php['version']).PHP_EOL);
+        info('Note that you might need to run <comment>composer global update</comment> if your PHP version change affects the dependencies of global packages required by Composer.');
+    })->descriptions('Change the version of PHP used by valet', [
+        'phpVersion' => 'The PHP version you want to use, e.g 7.3',
+        '--site' => 'Isolate PHP version of a specific valet site. e.g: --site=site.test',
+    ]);
 
     /**
      * Tail log file.

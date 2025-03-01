@@ -164,6 +164,8 @@ class Configuration
             $this->updateKey('tld', ! empty($config['domain']) ? $config['domain'] : 'test');
         }
 
+        $this->addDefaultPhp();
+
         // Add php_port if missing.
         $this->updateKey('php_port', $config['php_port'] ?? PhpCgi::PORT);
         $this->updateKey('php_xdebug_port', $config['php_xdebug_port'] ?? PhpCgiXdebug::PORT);
@@ -177,6 +179,150 @@ class Configuration
     public function uninstall()
     {
         $this->files->unlink($this->valetHomePath());
+    }
+
+    /**
+     * Add the given php path to the configuration.
+     *
+     * @param  string  $path
+     * @param  bool  $prepend
+     * @return void
+     */
+    public function addDefaultPhp()
+    {
+        $phpPath = $phpPath ?? \PhpCgi::findDefaultPhpPath();
+
+        $this->addPhp($phpPath);
+
+        $php = $this->getPhp($phpPath);
+
+        $this->updateKey('default_php', $php['version']);
+    }
+
+    /**
+     * Get the php configuration by path.
+     *
+     * @param  string  $phpPath
+     * @return mixed
+     */
+    public function getPhp($phpPath)
+    {
+        $phpPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $phpPath);
+
+        $config = $this->read();
+
+        return collect($config['php'])->filter(function ($item) use ($phpPath) {
+            return $phpPath === $item['path'];
+        })->first();
+    }
+
+    /**
+     * Get the php configuration by version.
+     *
+     * @param  string  $phpVersion
+     * @return mixed
+     */
+    public function getPhpByVersion($phpVersion)
+    {
+        $phpVersion = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $phpVersion);
+
+        $config = $this->read();
+
+        return collect($config['php'])->filter(function ($item) use ($phpVersion) {
+            return $phpVersion === $item['version'];
+        })->first();
+    }
+
+    /**
+     * Add the given php path to the configuration.
+     *
+     * @param  string  $phpPath
+     * @return mixed
+     */
+    public function addPhp($phpPath)
+    {
+        $phpPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $phpPath);
+//        print_r($phpPath);
+//        exit;
+
+        $phpVersion = \PhpCgi::findPhpVersion($phpPath);
+
+        $config = $this->read();
+        $config['php'] = $config['php'] ?? [];
+
+        $existingPaths = collect($config['php'])->pluck('path')->toArray();
+        $existingPorts = collect($config['php'])->pluck('port')->toArray();
+
+        // don't want to overwrite existing config as there might be phpcgi service running for it
+        // forcing user to run uninstall to stop services and remove entry
+        if (in_array($phpPath, $existingPaths)) {
+            warning("PHP path {$phpPath} already added to valet");
+
+            return null;
+        }
+
+        if (isset($config['php'][$phpVersion])) {
+            warning("PHP version {$phpVersion} already added to valet from this path {$phpPath}");
+
+            return null;
+        }
+
+        if ($existingPorts) {
+            rsort($existingPorts);
+        }
+
+        $phpPort = count($existingPorts) ? $existingPorts[0] + 1 : PhpCgi::PORT;
+        $phpXdebugPort = $phpPort + 100;
+
+        $config['php'][$phpVersion] = [
+            'version' => $phpVersion,
+            'path' => $phpPath,
+            'port' => $phpPort,
+            'xdebug_port' => $phpXdebugPort,
+        ];
+
+        $this->write($config);
+
+        return $config['php'][$phpVersion];
+    }
+
+    /**
+     * Remove the given php path from the configuration.
+     *
+     * @param  string  $phpPath
+     * @return mixed
+     */
+    public function removePhp($phpPath)
+    {
+        $phpPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $phpPath);
+
+        $config = $this->read();
+        $config['php'] = $config['php'] ?? [];
+
+        $existingPaths = collect($config['php'])->pluck('path')->toArray();
+        $existingVersions = collect($config['php'])->pluck('port')->toArray();
+
+        if (! in_array($phpPath, $existingPaths)) {
+            warning("PHP path {$phpPath} not found in valet");
+
+            return null;
+        }
+
+        $php = collect($config['php'])->filter(function ($item) use ($phpPath) {
+            return $phpPath === $item['path'];
+        })->first();
+
+        if ($php['version'] === $config['default_php']) {
+            error("Default PHP {$php['version']} cannot be removed");
+
+            return null;
+        }
+
+        unset($config['php'][$php['version']]);
+
+        $this->write($config);
+
+        return $php;
     }
 
     /**

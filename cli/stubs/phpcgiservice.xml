@@ -1,6 +1,6 @@
 <service>
-  <id>valet_phpcgi</id>
-  <name>valet_phpcgi</name>
+  <id>PHPCGINAME</id>
+  <name>PHPCGINAME</name>
   <description>Valet PHP-CGI</description>
   <env name="PHP_FCGI_CHILDREN" value="4"/>
   <executable>PHP_PATH\php-cgi.exe</executable>
