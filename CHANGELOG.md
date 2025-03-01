@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.3 - 2025-03-01
+
+- Added support for PHP 8.4.
+
 ## 2.5.2 - 2023-12-21
 
 - Added support for PHP 8.2 and 8.3.
