@@ -30,6 +30,7 @@ class CraftValetDriver extends ValetDriver
                 return $dir;
             }
         }
+
         // Give up, and just return the default
         return is_file($sitePath.'/craft') ? 'web' : 'public';
     }
