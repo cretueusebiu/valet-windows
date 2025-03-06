@@ -46,7 +46,7 @@ class CommandLine
      * @param  callable  $onError
      * @return ProcessOutput
      */
-    public function run($command, callable $onError = null)
+    public function run($command, ?callable $onError = null)
     {
         return $this->runCommand($command, $onError);
     }
@@ -58,7 +58,7 @@ class CommandLine
      * @param  callable  $onError
      * @return ProcessOutput
      */
-    public function runAsUser($command, callable $onError = null)
+    public function runAsUser($command, ?callable $onError = null)
     {
         return $this->runCommand($command, $onError);
     }
@@ -70,7 +70,7 @@ class CommandLine
      * @param  callable|null  $onError
      * @return ProcessOutput
      */
-    public function powershell(string $command, callable $onError = null)
+    public function powershell(string $command, ?callable $onError = null)
     {
         return $this->runCommand("powershell -command \"$command\"", $onError);
     }
@@ -78,7 +78,7 @@ class CommandLine
     /**
      * @deprecated
      */
-    public function runOrDie($command, callable $onError = null)
+    public function runOrDie($command, ?callable $onError = null)
     {
         return $this->runOrExit($command, $onError);
     }
@@ -90,7 +90,7 @@ class CommandLine
      * @param  callable  $onError  (int $code, string $output)
      * @return ProcessOutput
      */
-    public function runOrExit($command, callable $onError = null)
+    public function runOrExit($command, ?callable $onError = null)
     {
         return $this->run($command, function ($code, $output) use ($onError) {
             if ($onError) {
@@ -108,7 +108,7 @@ class CommandLine
      * @param  callable  $onError
      * @return ProcessOutput
      */
-    public function runCommand($command, callable $onError = null)
+    public function runCommand($command, ?callable $onError = null)
     {
         $onError = $onError ?: function () {
         };
