@@ -81,7 +81,6 @@ class Valet
      *
      * @param  string  $currentVersion
      * @return bool
-     *
      */
     public function onLatestVersion($currentVersion): bool
     {
