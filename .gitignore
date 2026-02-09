@@ -1,6 +1,7 @@
 .DS_Store
 vendor/
 error.log
+composer.lock
 .phpunit.result.cache
 bin/nginx/valet
 bin/nginx/conf/nginx.conf

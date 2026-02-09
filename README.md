@@ -22,10 +22,10 @@ Before installation, make sure that no other programs such as Apache or Nginx ar
 - If you don't have PHP installed, open PowerShell (3.0+) as Administrator and run: 
 
 ```bash
-Set-ExecutionPolicy RemoteSigned -Scope Process; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://github.com/cretueusebiu/valet-windows/raw/master/bin/php.ps1" -OutFile $env:temp\php.ps1; .$env:temp\php.ps1 "8.3"
+Set-ExecutionPolicy RemoteSigned -Scope Process; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri "https://github.com/cretueusebiu/valet-windows/raw/master/bin/php.ps1" -OutFile $env:temp\php.ps1; .$env:temp\php.ps1 "8.4"
 ```
 
-(You can replace `8.3` with the PHP version you want to install: `7.4`, `8.0`, `8.1`, `8.2`, `8.3`)
+(You can replace `8.4` with the PHP version you want to install: `7.4`, `8.2`, `8.3`, `8.4`)
 
 > This script will download and install PHP for you and add it to your environment path variable. PowerShell is only required for this step.
 

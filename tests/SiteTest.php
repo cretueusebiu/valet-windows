@@ -493,7 +493,7 @@ class SiteTest extends TestCase
 
 class CommandLineFake extends CommandLine
 {
-    public function runCommand($command, callable $onError = null)
+    public function runCommand($command, ?callable $onError = null)
     {
         // noop
         //

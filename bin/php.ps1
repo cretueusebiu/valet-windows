@@ -10,7 +10,7 @@ if (Get-Command "php" -errorAction SilentlyContinue) {
     exit
 }
 
-if ('7.2','7.3','7.4','8.0','8.1','8.2','8.3' -notcontains $phpVersion) {
+if ('7.2','7.3','7.4','8.0','8.1','8.2','8.3','8.4' -notcontains $phpVersion) {
     throw "Invalid PHP version [$phpVersion]."
 }
 
@@ -21,6 +21,10 @@ function Find-PhpRelease {
 
     if (! $path) {
         $path = $phpResponse.$phpVersion."nts-vs16-$architecture"."zip"."path"
+    }
+
+    if (! $path) {
+        $path = $phpResponse.$phpVersion."nts-vs17-$architecture"."zip"."path"
     }
 
     if (! $path) {
@@ -41,6 +45,10 @@ function Find-XdebugRelease {
     }
 
     if ($html -match "php_xdebug-(.+)-${phpVersion}-vs16-nts${architecture}.dll") {
+        return "${xdebugReleasesUrl}/files/" + $matches[0]
+    }
+
+    if ($html -match "php_xdebug-(.+)-${phpVersion}-vs17-nts${architecture}.dll") {
         return "${xdebugReleasesUrl}/files/" + $matches[0]
     }
 

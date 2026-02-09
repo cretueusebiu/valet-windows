@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.5.3 - 2025-03-01
+## 2.5.4 - 2026-02-09
 
 - Added support for PHP 8.4.
 
