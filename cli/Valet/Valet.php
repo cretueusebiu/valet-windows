@@ -2,7 +2,7 @@
 
 namespace Valet;
 
-use Httpful\Request;
+use GuzzleHttp\Client;
 
 class Valet
 {
@@ -82,13 +82,14 @@ class Valet
      * @param  string  $currentVersion
      * @return bool
      *
-     * @throws \Httpful\Exception\ConnectionErrorException
      */
     public function onLatestVersion($currentVersion): bool
     {
-        $response = Request::get('https://api.github.com/repos/cretueusebiu/valet-windows/releases/latest')->send();
+        $response = json_decode((new Client)->get('https://api.github.com/repos/cretueusebiu/valet-windows/releases/latest', [
+            'headers' => ['User-Agent' => 'valet-windows'],
+        ])->getBody());
 
-        return version_compare($currentVersion, trim($response->body->tag_name, 'v'), '>=');
+        return version_compare($currentVersion, trim($response->tag_name, 'v'), '>=');
     }
 
     /**

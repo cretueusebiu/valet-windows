@@ -3,7 +3,7 @@
 namespace Valet;
 
 use DomainException;
-use Httpful\Request;
+use GuzzleHttp\Client;
 use Illuminate\Support\Collection;
 
 class Ngrok
@@ -79,7 +79,7 @@ Then use: valet ngrok authtoken my-token');
 
         foreach ($this->tunnelsEndpoints as $endpoint) {
             $response = retry(20, function () use ($endpoint, $domain) {
-                $body = Request::get($endpoint)->send()->body;
+                $body = json_decode((new Client)->get($endpoint)->getBody());
 
                 if (isset($body->tunnels) && count($body->tunnels) > 0) {
                     return $this->findHttpTunnelUrl($body->tunnels, $domain);
