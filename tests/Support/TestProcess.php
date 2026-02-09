@@ -45,7 +45,7 @@ class TestProcess
      * @param  string|null  $key
      * @return mixed
      */
-    public function json(string $key = null)
+    public function json(?string $key = null)
     {
         return $this->decodeOuputJson()->json($key);
     }
