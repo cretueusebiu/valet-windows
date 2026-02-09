@@ -72,7 +72,7 @@ Then use: valet ngrok authtoken my-token');
      *
      * @return string
      */
-    public function currentTunnelUrl(string $domain = null)
+    public function currentTunnelUrl(?string $domain = null)
     {
         // wait a second for ngrok to start before attempting to find available tunnels
         // sleep(1);
@@ -101,7 +101,7 @@ Then use: valet ngrok authtoken my-token');
      * @return string|null
      * @return void
      */
-    public function findHttpTunnelUrl(array $tunnels, string $domain = null)
+    public function findHttpTunnelUrl(array $tunnels, ?string $domain = null)
     {
         // If there are active tunnels on the Ngrok instance we will spin through them and
         // find the one responding on HTTP. Each tunnel has an HTTP and a HTTPS address
