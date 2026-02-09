@@ -4,16 +4,22 @@ namespace Valet;
 
 class PhpCgiXdebug extends PhpCgi
 {
-    const PORT = 9002;
+    const PORT = 9100;
 
     /**
      * @inheritDoc
      */
-    public function __construct(CommandLine $cli, Filesystem $files, WinSwFactory $winsw, Configuration $configuration)
+    public function __construct(CommandLine $cli, Filesystem $files, WinSwFactory $winswFactory, Configuration $configuration)
     {
-        parent::__construct($cli, $files, $winsw, $configuration);
+        parent::__construct($cli, $files, $winswFactory, $configuration);
 
-        $this->winsw = $winsw->make('phpcgixdebugservice');
+        foreach ($this->phpWinSws as $phpVersion => $phpWinSw) {
+            $phpServiceName = "php{$phpVersion}cgixdebugservice";
+
+            $this->phpWinSws[$phpVersion]['phpServiceName'] = $phpServiceName;
+            $this->phpWinSws[$phpVersion]['phpCgiName'] = "valet_php{$phpVersion}cgi_xdebug-{$phpWinSw['php']['xdebug_port']}";
+            $this->phpWinSws[$phpVersion]['winsw'] = $this->winswFactory->make($phpServiceName);
+        }
     }
 
     /**
@@ -21,11 +27,23 @@ class PhpCgiXdebug extends PhpCgi
      *
      * @return void
      */
-    public function install()
+    public function install($phpVersion = null)
     {
-        info('Installing PHP-CGI Xdebug service...');
+        $phps = $this->configuration->get('php', []);
 
-        $this->installService();
+        if ($phpVersion) {
+            if (! isset($this->phpWinSws[$phpVersion])) {
+                warning("PHP xDebug service for version {$phpVersion} not found");
+            }
+
+            $this->installService($phpVersion);
+
+            return;
+        }
+
+        foreach ($phps as $php) {
+            $this->installService($php['version']);
+        }
     }
 
     /**
@@ -33,17 +51,16 @@ class PhpCgiXdebug extends PhpCgi
      *
      * @return void
      */
-    public function installService()
+    public function installService($phpVersion, $phpCgiServiceConfig = null, $installConfig = null)
     {
-        if ($this->winsw->installed()) {
-            $this->winsw->uninstall();
-        }
+        $phpWinSw = $this->phpWinSws[$phpVersion];
 
-        $this->winsw->install([
-            'PHP_PATH' => $this->findPhpPath(),
-            'PHP_XDEBUG_PORT' => $this->configuration->get('php_xdebug_port', PhpCgiXdebug::PORT),
-        ]);
+        $phpCgiServiceConfig = $phpCgiServiceConfig ?? file_get_contents(__DIR__.'/../stubs/phpcgixdebugservice.xml');
+        $installConfig = $installConfig ?? [
+            'PHP_PATH' => $phpWinSw['php']['path'],
+            'PHP_XDEBUG_PORT' => $phpWinSw['php']['xdebug_port'],
+        ];
 
-        $this->winsw->restart();
+        parent::installService($phpVersion, $phpCgiServiceConfig, $installConfig);
     }
 }

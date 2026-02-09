@@ -1,6 +1,6 @@
 <service>
-  <id>valet_phpcgi_xdebug</id>
-  <name>valet_phpcgi_xdebug</name>
+  <id>PHPCGINAME</id>
+  <name>PHPCGINAME</name>
   <description>Valet PHP-CGI Xdebug</description>
   <env name="PHP_FCGI_CHILDREN" value="1"/>
   <executable>PHP_PATH\php-cgi.exe</executable>

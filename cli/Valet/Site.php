@@ -398,6 +398,104 @@ class Site
      *
      * @return array
      */
+    public function publishParkedNginxConf($parkedPath)
+    {
+        $parked = $this->parked();
+
+        // TODO
+    }
+
+    /**
+     * Get the site URL from a directory if it's a valid Valet site.
+     *
+     * @param  string  $directory
+     * @return string|false
+     */
+    public function usePhp($phpVersion, $directory)
+    {
+        $site = $this->getSiteUrl($directory);
+
+        if (! $site) {
+            throw new DomainException("The {$directory} site could not be found in Valet's site list.");
+        }
+
+        // Remove isolation for this site
+        if ($phpVersion == 'default') {
+            // Example output: "7.4"
+            $oldCustomPhpVersion = $this->customPhpVersion($site);
+            $this->removeIsolation($site);
+            \Nginx::restart();
+            info("The site [$site] is now using the default PHP version.");
+
+            return;
+        }
+
+        $php = $this->config->getPhpByVersion($phpVersion);
+
+        if (empty($php)) {
+            warning("Cannot find PHP [$phpVersion] in the list.");
+        }
+
+        $this->installSiteConfig($site, $php['version']);
+
+        info('Restarting Nginx...');
+        \Nginx::stop();
+        \Nginx::restart();
+        info("The site [$site] is now using $phpVersion.");
+    }
+
+    /**
+     * Get the site URL from a directory if it's a valid Valet site.
+     *
+     * @param  string  $directory
+     * @return string|false
+     */
+    public function getSiteUrl($directory)
+    {
+        $tld = $this->config->read()['tld'];
+
+        // Allow user to use dot as current dir's site `--site=.`
+        if ($directory == '.' || $directory == './') {
+            $directory = $this->host(getcwd());
+        }
+
+        // Remove .tld from sitename if it was provided
+        $directory = str_replace('.'.$tld, '', $directory);
+
+        if (! $this->parked()->merge($this->links())->where('site', $directory)->count() > 0) {
+            // Invalid directory provided
+            warning('Invalid site or directory given');
+
+            return false;
+        }
+
+        return $directory.'.'.$tld;
+    }
+
+    /**
+     * Extract PHP version of exising nginx conifg.
+     *
+     * @param  string  $url
+     * @return string|void
+     */
+    public function customPhpVersion($url)
+    {
+        if ($this->files->exists($this->nginxPath($url))) {
+            $siteConf = $this->files->get($this->nginxPath($url));
+
+            if (starts_with($siteConf, '# Valet isolated PHP version')) {
+                $firstLine = explode(PHP_EOL, $siteConf)[0];
+
+                return trim(str_replace('# Valet isolated PHP version : ', '', $firstLine));
+            }
+        }
+    }
+
+    /**
+     * Get all of the URLs that are currently secured.
+     *
+     * @return array
+     */
     public function secured()
     {
         return collect($this->files->scandir($this->certificatesPath()))
@@ -415,6 +513,8 @@ class Site
      */
     public function secure($url, $siteConf = null)
     {
+        // Extract in order to later preserve custom PHP version config when securing
+        $phpVersion = $this->customPhpVersion($url);
         $this->unsecure($url);
 
         $this->files->ensureDirExists($this->certificatesPath(), user());
@@ -422,6 +522,14 @@ class Site
         $this->files->ensureDirExists($this->nginxPath(), user());
 
         $this->createCertificate($url);
+
+        $siteConf = $this->buildSecureNginxServer($url, $siteConf);
+
+        // If the user had isolated the PHP version for this site, swap out the PHP version
+        if ($phpVersion) {
+            $php = $this->config->getPhpByVersion($phpVersion);
+            $siteConf = $this->replacePhpVersionInSiteConf($siteConf, $php['port'], $phpVersion);
+        }
 
         $this->files->putAsUser(
             $this->nginxPath($url), $this->buildSecureNginxServer($url, $siteConf)
@@ -559,6 +667,67 @@ class Site
     }
 
     /**
+     * Build the Nginx server configuration for the given Valet site.
+     *
+     * @param  string  $valetSite
+     * @param  string  $phpVersion
+     * @return string
+     */
+    public function installSiteConfig($valetSite, $phpVersion)
+    {
+        $phpVersion = $phpVersion ? $phpVersion : $this->config->get('default_php');
+
+        $php = $this->config->getPhpByVersion($phpVersion);
+
+        if (empty($php)) {
+            warning("Cannot find PHP [$phpVersion] in the list.");
+
+            return;
+        }
+
+        if ($this->files->exists($this->nginxPath($valetSite))) {
+            $siteConf = $this->files->get($this->nginxPath($valetSite));
+        } else {
+            $siteConf = $this->files->get(__DIR__.'/../stubs/unsecure.valet.conf');
+            $siteConf = str_replace(
+                ['VALET_HOME_PATH', 'VALET_SERVER_PATH', 'VALET_STATIC_PREFIX', 'VALET_SITE', 'HOME_PATH'],
+                [$this->valetHomePath(), VALET_SERVER_PATH, VALET_STATIC_PREFIX, $valetSite, $_SERVER['HOME']],
+                $siteConf
+            );
+        }
+
+        $siteConf = $this->replacePhpVersionInSiteConf($siteConf, $php['port'], $php['version']);
+
+        $this->files->putAsUser($this->nginxPath($valetSite), $siteConf);
+    }
+
+    /**
+     * Remove PHP Version isolation from a specific site.
+     *
+     * @param  string  $valetSite
+     * @return void
+     */
+    public function removeIsolation($valetSite)
+    {
+        $existingSiteConf = $this->getSiteConfigFileContents($valetSite);
+
+        if (empty($existingSiteConf)) {
+            $siteConf = $this->buildSecureNginxServer($valetSite);
+        }
+
+        $siteConf = $this->replacePhpVersionInSiteConf($valetSite, '$valet_php_port');
+
+        // If a site has an SSL certificate, we need to keep its custom config file
+        if ($this->files->exists($this->certificatesPath($valetSite, 'crt'))) {
+            $this->files->putAsUser($this->nginxPath($valetSite), $siteConf);
+        } else {
+            if ($existingSiteConf) {
+                $this->files->putAsUser($this->nginxPath($valetSite), $siteConf);
+            }
+        }
+    }
+
+    /**
      * Build the TLS secured Nginx server for the given URL.
      *
      * @param  string  $url
@@ -573,11 +742,35 @@ class Site
 
         $path = $this->certificatesPath();
 
+//        , 'VALET_PHP_PORT', 'VALET_ISOLATED_PHP_VERSION'
+//    , $php['port'], $php['version']
+
         return str_replace(
             ['VALET_HOME_PATH', 'VALET_SERVER_PATH', 'VALET_STATIC_PREFIX', 'VALET_SITE', 'VALET_CERT', 'VALET_KEY', 'HOME_PATH'],
             [$this->valetHomePath(), VALET_SERVER_PATH, VALET_STATIC_PREFIX, $url, $path.'/'.$url.'.crt', $path.'/'.$url.'.key', $_SERVER['HOME']],
             $siteConf
         );
+    }
+
+    /**
+     * Replace .sock file in an Nginx site configuration file contents.
+     *
+     * @param  string  $siteConf
+     * @param  string  $phpPort
+     */
+    public function replacePhpVersionInSiteConf($siteConf, $phpPort, $phpVersion = null)
+    {
+        $siteConf = preg_replace('/127.0.0.1:[0-9]*;/', "127.0.0.1:{$phpPort};", $siteConf);
+        $siteConf = str_replace('127.0.0.1:$valet_php_port;', "127.0.0.1:{$phpPort};", $siteConf);
+
+        // Remove `Valet isolated PHP version` line from config
+        $siteConf = preg_replace('/# Valet isolated PHP version.*\n/', '', $siteConf);
+
+        if ($phpVersion) {
+            $siteConf = '# Valet isolated PHP version : '.$phpVersion.PHP_EOL.$siteConf;
+        }
+
+        return $siteConf;
     }
 
     /**
@@ -588,6 +781,9 @@ class Site
      */
     public function unsecure($url)
     {
+        // Extract in order to later preserve custom PHP version config when unsecuring. Example output: "8.1.2"
+        $phpVersion = $this->customPhpVersion($url);
+
         if ($this->files->exists($this->certificatesPath($url, 'crt'))) {
             $this->files->unlink($this->nginxPath($url));
 
@@ -597,6 +793,11 @@ class Site
         }
 
         $this->cli->run(sprintf('cmd "/C certutil -delstore "Root" "%s""', $url));
+
+        // If the user had isolated the PHP version for this site, swap out .sock file
+        if ($phpVersion) {
+            $this->installSiteConfig($url, $phpVersion);
+        }
     }
 
     public function unsecureAll()
